@@ -1,7 +1,9 @@
 #pragma once
 
-#include <windows.h>
+//Include for both pch
+#include "CommonInclude.h"
 
+//Don't touch (only for sampleProject)
 #include "resource.h"
 
 #ifdef _DEBUG

@@ -9,9 +9,9 @@
     "dependencies": ["LyonPlexLib"],
     "configuration": [
         {
-            "additional_dependencies": "%(AdditionalDependencies)",
-            "additional_include_directories": "",
-            "additional_library_directories": "",
+            "additional_dependencies": "LyonPlexLib.lib;%(AdditionalDependencies)",
+            "additional_include_directories": "$(SolutionDir)..\\..\\src\\LyonPlexLib",
+            "additional_library_directories": "$(SolutionDir)..\\..\\ide\\vs\\LyonPlexLib\\Build\\Debug",
             "character_set": "Unicode",
             "conformance_mode": "true",
             "generate_debug_information": "true",

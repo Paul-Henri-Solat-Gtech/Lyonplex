@@ -13,7 +13,11 @@ bool WindowPlex::Init(HINSTANCE appInstance, const std::wstring& windowName, int
     wcx.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcx.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     // more parameters can be added
-    RegisterClassEx(&wcx);
+    if (RegisterClassEx(&wcx) == 0) 
+    {
+        // Error register new class
+        return false;
+    }
 
     m_windowHandle = CreateWindowEx(
         0, className, windowName.c_str(),
@@ -21,6 +25,11 @@ bool WindowPlex::Init(HINSTANCE appInstance, const std::wstring& windowName, int
         CW_USEDEFAULT, CW_USEDEFAULT, windowWidth, windowHeight,
         nullptr, nullptr, appInstance, nullptr
     );
+
+    if (!m_windowHandle) {
+        // Error window creation
+        return false;
+    }
 
     ShowWindow(m_windowHandle, SW_SHOW);
     UpdateWindow(m_windowHandle);

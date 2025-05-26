@@ -22,7 +22,7 @@ void RenderingManager::Init()
 
     // Créer le Swap chain
     DXGI_SWAP_CHAIN_DESC1 scDesc = {};
-    scDesc.BufferCount = FrameCount;
+    scDesc.BufferCount = FRAMECOUNT;
     scDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     scDesc.Width = 800;  // ou la taille de ta fenêtre
     scDesc.Height = 600;
@@ -38,14 +38,14 @@ void RenderingManager::Init()
 
     // RTV Heap
     D3D12_DESCRIPTOR_HEAP_DESC rtvDesc = {};
-    rtvDesc.NumDescriptors = FrameCount;
+    rtvDesc.NumDescriptors = FRAMECOUNT;
     rtvDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     m_device->CreateDescriptorHeap(&rtvDesc, IID_PPV_ARGS(&m_rtvHeap));
     m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
     // Render targets
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
-    for (UINT i = 0; i < FrameCount; i++) {
+    for (UINT i = 0; i < FRAMECOUNT; i++) {
         m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
         m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
         rtvHandle.Offset(1, m_rtvDescriptorSize);
@@ -159,8 +159,8 @@ void RenderingManager::RecordCommands()
     D3D12_VIEWPORT viewport = {};
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
-    viewport.Width = static_cast<float>(800);  // window width
-    viewport.Height = static_cast<float>(600);  // window height
+    viewport.Width = 800;  // window width
+    viewport.Height = 600;  // window height
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
 

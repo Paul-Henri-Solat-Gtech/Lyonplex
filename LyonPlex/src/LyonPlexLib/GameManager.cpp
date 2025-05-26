@@ -20,7 +20,7 @@ bool GameManager::Init()
     // 2) Configurer le renderer avec le handle de la fenetre
     HWND hwnd = m_window.GetWindowHandle();
     m_renderer.SetWindowHandle(hwnd);
-    m_renderer.Init();
+    m_renderer.Init(); // A VOIR MODIFIER ET METTRE HWND COMME ARGUMENT EN POINTEUR (et mettre le init en bool)
 
     m_isRunning = true;
     return true;
@@ -58,7 +58,7 @@ int GameManager::Run()
         m_renderer.Present();
 
         // Synchronisation CPU/GPU (on attend que le GPU ait fini)
-        m_renderer.SignalAndWait();
+        WaitForPreviousFrame();
     }
 
     return static_cast<int>(msg.wParam);
@@ -72,4 +72,5 @@ void GameManager::WaitForPreviousFrame()
 
 void GameManager::ProcessMessage()
 {
+
 }

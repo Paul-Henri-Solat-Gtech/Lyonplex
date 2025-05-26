@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "GameManager.h"
 
 GameManager::GameManager(HINSTANCE hInstance) : m_hInstance(hInstance)
@@ -14,7 +14,7 @@ GameManager::~GameManager()
 bool GameManager::Init() 
 {
     // 1) Creer la fenetre
-    if (!m_window.Init(m_hInstance, L"MonJeuDX12", 1280, 720))
+    if (!m_window.Init(m_hInstance, L"MonJeuDX12", 800, 600))
         return false;
 
     // 2) Configurer le renderer avec le handle de la fenetre
@@ -31,33 +31,45 @@ int GameManager::Run()
     // Message et boucle de rendu
     MSG msg = {};
     while (m_isRunning) {
-        // Traiter tous les messages en attente
+        
+        // 1) Gestion des messages Windows
+        ProcessMessage();
+
+        // 2) Traitement manuel des messages restants
         while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-            if (msg.message == WM_QUIT) {
+            if (msg.message == WM_QUIT) 
+            {
+                // Si on reçoit WM_QUIT, on sort de la boucle
                 m_isRunning = false;
             }
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            TranslateMessage(&msg); // Prépare le message (gestion du clavier, etc.)
+            DispatchMessage(&msg); // Appelle la WindowProcedure correspondante
         }
 
         // Enregistrement et envoi des commandes
+        
+        // 3) Enregistrement des commandes de rendu dans la CommandList
         m_renderer.RecordCommands();
+        
+        // 4) Soumission des commandes au GPU pour exécution
         m_renderer.ExecuteCommands();
+        
+        // 5) Présentation du back buffer à l’écran (swap buffers)
         m_renderer.Present();
 
-        // Synchronisation CPU/GPU
+        // Synchronisation CPU/GPU (on attend que le GPU ait fini)
         m_renderer.SignalAndWait();
     }
 
     return static_cast<int>(msg.wParam);
 }
 
-void GameManager::ProcessMessage()
-{
-}
-
 // helper pour la synchronisation
-void GameManager::WaitForPreviousFrame() 
+void GameManager::WaitForPreviousFrame()
 {
     m_renderer.SignalAndWait();
+}
+
+void GameManager::ProcessMessage()
+{
 }

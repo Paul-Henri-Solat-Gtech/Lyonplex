@@ -26,7 +26,8 @@ bool WindowPlex::Init(HINSTANCE appInstance, const std::wstring& windowName, int
         nullptr, nullptr, appInstance, nullptr
     );
 
-    if (!m_windowHandle) {
+    if (!m_windowHandle) 
+    {
         // Error window creation
         return false;
     }

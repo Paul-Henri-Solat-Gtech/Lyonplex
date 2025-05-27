@@ -21,7 +21,7 @@ bool RenderingManager::Init()
     m_descriptorManager.CreateDescriptorManager();
     
     // Render targets
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle( m_descriptorManager.GetRtvHeap()->GetCPUDescriptorHandleForHeapStart());
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorManager.GetRtvHeap()->GetCPUDescriptorHandleForHeapStart());
     for (UINT i = 0; i < m_graphicsDevice.GetFrameCount(); i++) {
         m_graphicsDevice.GetSwapChain()->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
         m_graphicsDevice.GetDevice()->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);

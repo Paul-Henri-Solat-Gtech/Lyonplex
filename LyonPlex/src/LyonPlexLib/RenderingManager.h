@@ -1,11 +1,15 @@
 ﻿#pragma once
 
+#include "GraphicsDevice.h"
+#include "DescriptorManager.h"
+#include "CommandManager.h"
+
 class RenderingManager
 {
 public:
-	void Init();
+	bool Init();
 	
-	void SetWindowHandle(HWND windowHandle) { m_createdWindow = windowHandle; }
+	void SetWindowHandle(HWND windowHandle) { m_windowWP = windowHandle; }
 
 	void CreatePipeline();	// Managing chain for 3D and 2D elements (data not draw)
 	void RecordCommands();	// Enregistre dans la CommandList les instructions de rendu pour chaque frame (par exemple un draw)
@@ -15,27 +19,20 @@ public:
 
 private:
 	
-	HWND m_createdWindow;		// The created base window (pour le swapchain)
-	const UINT FRAMECOUNT = 2;  // Nombre de buffers utilisés dans le swap chain (double buffering)
+	HWND m_windowWP;		// The created base window (pour le swapchain)
 
 	// COM objects
-	ComPtr<ID3D12Device> m_device;						// Interface principale pour interagir avec le GPU
-	ComPtr<IDXGISwapChain3> m_swapChain;				// Permet d’afficher les images rendues à l’écran
-	ComPtr<ID3D12CommandQueue> m_commandQueue;			// File d’attente pour les commandes GPU
-	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;				// TAS de descripteurs pour les render target views (RTV)
 	ComPtr<ID3D12Resource> m_renderTargets[2];			// Les textures (back buffers) où le rendu est effectué (taille FrameCount)
-	ComPtr<ID3D12CommandAllocator> m_commandAllocator;  // Alloue de la mémoire pour les commandes GPU
-	ComPtr<ID3D12GraphicsCommandList> m_commandList;	// Liste contenant les commandes graphiques à exécuter
-	ComPtr<ID3D12Fence> m_fence;						// Synchronisation CPU <-> GPU
-	UINT m_rtvDescriptorSize;							// Taille d’un descripteur RTV dans le heap
-	UINT m_frameIndex;									// Index du back buffer courant dans le swap chain
-	HANDLE m_fenceEvent;								// Événement Win32 pour attendre que la fence atteigne une valeur
-	UINT64 m_fenceValue = 0;							// Valeur actuelle de synchronisation de la fence
 
 	// Pipeline graphique
 	ComPtr<ID3D12RootSignature> m_rootSignature;		// Décrit les ressources accessibles par les shaders
 	ComPtr<ID3D12PipelineState> m_pipelineState;		// Contient l'état complet du pipeline graphique
 	ComPtr<ID3D12Resource> m_vertexBuffer;				// Buffer contenant les sommets à dessiner
 	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;		// Vue permettant d’accéder au vertex buffer dans le pipeline
+
+	// Instance de class de directX
+	GraphicsDevice m_graphicsDevice;
+	DescriptorManager m_descriptorManager;
+	CommandManager m_commandManager;
 };
 

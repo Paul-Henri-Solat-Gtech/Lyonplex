@@ -12,7 +12,7 @@ void MeshManager::AddNewMesh(MeshParam vertices[], size_t vertexCount, uint16_t 
 {
 	UINT vSize = static_cast<UINT>(vertexCount * sizeof(MeshParam));
 	UINT iSize = static_cast<UINT>(indexCount * sizeof(uint16_t));
-
+	
 	// On utilise un heap UPLOAD pour permettre au CPU d'ecrire dans la memoire
 	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC vbDesc = CD3DX12_RESOURCE_DESC::Buffer(vSize);
@@ -53,9 +53,9 @@ void MeshManager::InitializeMesh_Triangle()
 {
 	MeshParam triangle[] =
 	{
-		{{ 0.0f,  0.25f, 0.0f},{1,0,0,1}},
-		{{ 0.25f,-0.25f, 0.0f},{0,1,0,1}},
-		{{-0.25f,-0.25f, 0.0f},{0,0,1,1}},
+		{{ 0.0f,  0.25f, 0.0f},{0,0,0,1}},
+		{{ 0.25f,-0.25f, 0.0f},{0,0,0,1}},
+		{{-0.25f,-0.25f, 0.0f},{0,0,0,1}},
 	};
 
 	// Definition des indices pour dessiner 2 triangles

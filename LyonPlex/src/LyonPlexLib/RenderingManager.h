@@ -13,6 +13,9 @@ public:
 	void SetWindowHandle(HWND windowHandle) { m_windowWP = windowHandle; }
 
 	void RecordCommands();	// Enregistre dans la CommandList les instructions de rendu pour chaque frame (par exemple un draw)
+	void ResetCommands();
+	void SetBarrierToRenderTarget(CD3DX12_RESOURCE_BARRIER& barrier);
+	void SetBarrierToPresent(CD3DX12_RESOURCE_BARRIER& barrier);
 	void ExecuteCommands(); // Envoie la CommandList enregistrée au GPU via la CommandQueue
 	void Present();			// Demande à la swap chain de présenter le back buffer courant à l’écran
 	void SignalAndWait();	// Synchronise le CPU et la GPU en signalant la fence et en attendant sa complétion

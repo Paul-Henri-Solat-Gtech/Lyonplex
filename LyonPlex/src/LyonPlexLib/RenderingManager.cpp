@@ -38,29 +38,51 @@ bool RenderingManager::Init()
 
 void RenderingManager::RecordCommands()
 {
-    // Reset CmdAlloc et CmdList
-    m_commandManager.GetCommandAllocator()->Reset();
-    //mp_commandManager->GetCommandList()->Reset(mp_commandManager->GetCommandAllocator().Get(), m_graphicsPipeline.GetPipelineState().Get());
-    m_commandManager.GetCommandList()->Reset(m_commandManager.GetCommandAllocator().Get(), nullptr);
+    ResetCommands();
 
     // Barrier pour faire la transition du back buffer de l'etat PRESENT a RENDER_TARGET
-    CD3DX12_RESOURCE_BARRIER barrier; 
-        
+    CD3DX12_RESOURCE_BARRIER barrier;
+
+    SetBarrierToRenderTarget(barrier);
+
+    // Classes Render
+    /**/
+
+    m_render3D.RecordCommands();
+
+    /**/
+
+    SetBarrierToPresent(barrier);   
+
+    m_commandManager.GetCommandList()->Close();
+}
+
+
+
+
+void RenderingManager::ResetCommands()
+{
+    // Reset CmdAlloc et CmdList
+    m_commandManager.GetCommandAllocator()->Reset();
+    m_commandManager.GetCommandList()->Reset(m_commandManager.GetCommandAllocator().Get(), nullptr);
+    //mp_commandManager->GetCommandList()->Reset(mp_commandManager->GetCommandAllocator().Get(), m_graphicsPipeline.GetPipelineState().Get());
+}
+void RenderingManager::SetBarrierToRenderTarget(CD3DX12_RESOURCE_BARRIER& barrier)
+{
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_graphicsDevice.GetRenderTargetResource(m_graphicsDevice.GetFrameIndex()), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
     m_commandManager.GetCommandList()->ResourceBarrier(1, &barrier);
 
     // On fixe le RTV sur la bonne frame 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorManager.GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), m_graphicsDevice.GetFrameIndex(), m_descriptorManager.GetRtvDescriptorSize());
-
-    // Classes Render
-    m_render3D.RecordCommands();
-
+}
+void RenderingManager::SetBarrierToPresent(CD3DX12_RESOURCE_BARRIER& barrier)
+{
     // Transition du back buffer de RENDER_TARGET a PRESENT pour la presentation
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_graphicsDevice.GetRenderTargetResource(m_graphicsDevice.GetFrameIndex()), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     m_commandManager.GetCommandList()->ResourceBarrier(1, &barrier);
-
-    m_commandManager.GetCommandList()->Close();
 }
+
+
 
 void RenderingManager::ExecuteCommands()
 {

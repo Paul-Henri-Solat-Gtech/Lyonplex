@@ -59,34 +59,10 @@ void Render3D::RecordCommands()
 	mp_commandManager->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_meshManager.GetVertexBufferView());
 	mp_commandManager->GetCommandList()->IASetIndexBuffer(&m_meshManager.GetIndexBufferView());
-	//mp_commandManager->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 	mp_commandManager->GetCommandList()->DrawIndexedInstanced(3, 1, 0, 0, 0);
 }
 
 void Render3D::CreatePipeline()
 {
 	m_graphicsPipeline.CreatePipeline();
-
-	//--------------------------------------------------- Draw a triangle
-	//Vertex triangle[] = {
-	//	{{ 0.0f,  0.25f, 0.0f},{1,0,0,1}},
-	//	{{ 0.25f,-0.25f, 0.0f},{0,1,0,1}},
-	//	{{-0.25f,-0.25f, 0.0f},{0,0,1,1}},
-	//};
-	//const UINT vbSize = sizeof(triangle);
-	//CD3DX12_HEAP_PROPERTIES hp(D3D12_HEAP_TYPE_UPLOAD);
-	//CD3DX12_RESOURCE_DESC rd = CD3DX12_RESOURCE_DESC::Buffer(vbSize);
-	//mp_graphicsDevice->GetDevice()->CreateCommittedResource(&hp, D3D12_HEAP_FLAG_NONE, &rd,
-	//	D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_vertexBuffer));
-
-	//void* p;
-	//m_vertexBuffer->Map(0, nullptr, &p);
-	//memcpy(p, triangle, vbSize);
-	//m_vertexBuffer->Unmap(0, nullptr);
-
-	//m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-	//m_vertexBufferView.SizeInBytes = vbSize;
-	//m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-	//----------------------------------------------------- Pour test
-
 }

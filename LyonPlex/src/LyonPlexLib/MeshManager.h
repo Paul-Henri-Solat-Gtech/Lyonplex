@@ -55,10 +55,10 @@ private:
 	void* m_pIndexData = nullptr;
 
 	//
-	//ComPtr<ID3D12Resource> m_vertexBuffer;
+	ComPtr<ID3D12Resource> m_vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
 
-	//ComPtr<ID3D12Resource> m_indexBuffer;
+	ComPtr<ID3D12Resource> m_indexBuffer;
 	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
 	// Nombre d'indices pour le rendu

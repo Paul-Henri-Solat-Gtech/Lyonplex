@@ -10,13 +10,7 @@ bool Render3D::Init(HWND windowHandle, GraphicsDevice* graphicsDevice, Descripto
 
 	m_graphicsPipeline.Init(mp_graphicsDevice, mp_descriptorManager, mp_commandManager);
 
-	// Render targets
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(mp_descriptorManager->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart());
-	for (UINT i = 0; i < mp_graphicsDevice->GetFrameCount(); i++) {
-		mp_graphicsDevice->GetSwapChain()->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
-		mp_graphicsDevice->GetDevice()->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
-		rtvHandle.Offset(1, mp_descriptorManager->GetRtvDescriptorSize());
-	}
+
 
 	return true;
 }
@@ -28,8 +22,8 @@ void Render3D::Resize(int w, int h)
 
 void Render3D::RecordCommands()
 {
-	
-	// Définir le viewport et le scissor  (peuvent servir a "fenetrer" de l'affichage, par exemple pour minimap)
+
+	// Définir le viewport et le scissor  (peuvent servir a "fenetrer" de l'affichage, par exemple pour minimap) : PEUT ETRE GENERAL OU VARIABLE
 	// Le viewport représente la zone de la fenêtre dans laquelle on va dessiner
 	D3D12_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
@@ -40,61 +34,37 @@ void Render3D::RecordCommands()
 	viewport.MaxDepth = 1.0f;
 
 	// Le scissor défini un rectangle de pixels à dessiner dans la zone de dessin (viewport). Tous les pixels en dehors de cette zone ne sont pas dessinés.
-	D3D12_RECT scissor = { 0, 0, 800, 600 };
-
-
-
-
-	// Reset CmdAlloc et CmdList
-	mp_commandManager->GetCommandAllocator()->Reset();
-	//mp_commandManager->GetCommandList()->Reset(mp_commandManager->GetCommandAllocator().Get(), m_graphicsPipeline.GetPipelineState().Get());
-	mp_commandManager->GetCommandList()->Reset(mp_commandManager->GetCommandAllocator().Get(), nullptr);
-
-	// Barrier pour faire la transition du back buffer de l'etat PRESENT a RENDER_TARGET
-	CD3DX12_RESOURCE_BARRIER barrier;
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[mp_graphicsDevice->GetFrameIndex()].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	mp_commandManager->GetCommandList()->ResourceBarrier(1, &barrier);
-
-	// ViewPort et Scissors définissent le rectangle de pixel qui est rendu dans la fenetre
-	mp_commandManager->GetCommandList()->RSSetViewports(1, &viewport);
-	mp_commandManager->GetCommandList()->RSSetScissorRects(1, &scissor);
-
-	// On fixe le RTV sur la bonne frame 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(mp_descriptorManager->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), mp_graphicsDevice->GetFrameIndex(), mp_descriptorManager->GetRtvDescriptorSize());
-	
-
-
+	D3D12_RECT scissorRect = { 0, 0, 800, 600 };
 
 	// ### BLOC DESSIN QUI N EST PAS COMMUN A 3D, 2D ET UI
-	{
-		// On définie la pipeline et la rootSignature
-		mp_commandManager->GetCommandList()->SetGraphicsRootSignature(m_graphicsPipeline.GetRootSignature().Get());
-		mp_commandManager->GetCommandList()->SetPipelineState(m_graphicsPipeline.GetPipelineState().Get());
 
-		// Actualisation du rectangle dans lequel on dessine, dans la fenetre
-		//mp_commandManager->GetCommandList()->RSSetViewports(1, &viewPort);
-		//mp_commandManager->GetCommandList()->RSSetScissorRects(1, &scissorRect);
+	// On définie la pipeline et la rootSignature
+	mp_commandManager->GetCommandList()->SetGraphicsRootSignature(m_graphicsPipeline.GetRootSignature().Get());
+	mp_commandManager->GetCommandList()->SetPipelineState(m_graphicsPipeline.GetPipelineState().Get());
 
-		// On définie le RTV sur lequel on va dessiner (pour nous les 3 RTV sont les mêmes je crois)
-		mp_commandManager->GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-
-		const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-		mp_commandManager->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-		// Ajouter ClearDepthStencil quand on l'aura ajouté a la pipeline
-
-		//Draw vertices (mesh)
-		mp_commandManager->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-		mp_commandManager->GetCommandList()->DrawInstanced(3, 1, 0, 0);
-	}
+	// Actualisation du rectangle dans lequel on dessine, dans la fenetre
+	mp_commandManager->GetCommandList()->RSSetViewports(1, &viewport);
+	mp_commandManager->GetCommandList()->RSSetScissorRects(1, &scissorRect);
 
 
+	UINT frameIndex = mp_graphicsDevice->GetFrameIndex();
+	// calcule à la volée le handle CPU vers le i-ème RTV
+	auto rtvHandle = mp_descriptorManager->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart();
+	rtvHandle.ptr += UINT64(frameIndex) * mp_descriptorManager->GetRtvDescriptorSize();
 
-	// Transition du back buffer de RENDER_TARGET a PRESENT pour la presentation
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[mp_graphicsDevice->GetFrameIndex()].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	mp_commandManager->GetCommandList()->ResourceBarrier(1, &barrier);
+	// On définie le RTV sur lequel on va dessiner (pour nous les 3 RTV sont les mêmes je crois)
+	mp_commandManager->GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
-	mp_commandManager->GetCommandList()->Close();
+	const float clearColor[] = { 0.0f, 0.7f, 0.7f, 1.0f };
+	mp_commandManager->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	// Ajouter ClearDepthStencilView() quand on l'aura ajouté a la pipeline
+
+
+	//Draw vertices (mesh)
+	mp_commandManager->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	mp_commandManager->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+
 }
 
 void Render3D::CreatePipeline()

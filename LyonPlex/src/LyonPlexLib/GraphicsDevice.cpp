@@ -5,6 +5,8 @@ bool GraphicsDevice::Init(HWND windowWP)
 {
     m_windowWP = windowWP;
 
+    m_renderTargets.resize(FRAMECOUNT);
+
     return true;
 }
 
@@ -50,6 +52,28 @@ void GraphicsDevice::CreateSwapChain()
         m_commandQueue.Get(), m_windowWP, &scDesc, nullptr, nullptr, &tempSwapChain);
     tempSwapChain.As(&m_swapChain);
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+    
+}
+
+void GraphicsDevice::SetRenderTargets(DescriptorManager* descManager)
+{ 
+    m_renderTargets.resize(FRAMECOUNT);
+
+    // Render targets
+    //CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descManager->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart());
+    //m_rtvHandle = rtvHandle;
+
+    for (UINT i = 0; i < FRAMECOUNT; i++)
+    {
+        m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
+
+        // alloue le prochain descriptor RTV dans le heap
+        D3D12_CPU_DESCRIPTOR_HANDLE RtvHandle = descManager->AllocateRtvCPU();
+
+        m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, RtvHandle);
+        m_rtvHandle.Offset(1, descManager->GetRtvDescriptorSize());
+    }
 }
 
 void GraphicsDevice::Release()

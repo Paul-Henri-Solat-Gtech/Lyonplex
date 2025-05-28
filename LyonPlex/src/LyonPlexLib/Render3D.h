@@ -26,7 +26,7 @@ private:
 
 	GraphicsPipeline m_graphicsPipeline;
 
-	ComPtr<ID3D12Resource> m_renderTargets[2];			//A changer ?
+
 
 	// mesh
 	ComPtr<ID3D12Resource> m_vertexBuffer;				// Buffer contenant les sommets à dessiner

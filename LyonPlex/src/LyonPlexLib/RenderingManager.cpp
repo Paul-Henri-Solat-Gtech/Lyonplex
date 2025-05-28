@@ -3,12 +3,14 @@
 
 bool RenderingManager::Init()
 {
+    // Graphics Device
     if (!m_graphicsDevice.Init(m_windowWP)) 
     {
         return false;
     }
     m_graphicsDevice.CreateGraphicsDevice();
 
+    // Descriptor Manager
     if (!m_descriptorManager.Init(&m_graphicsDevice))
     {
         return false;
@@ -17,12 +19,14 @@ bool RenderingManager::Init()
 
     m_graphicsDevice.SetRenderTargets(&m_descriptorManager);
 
+    // Command Manager
     if (!m_commandManager.Init(&m_graphicsDevice, &m_descriptorManager))
     {
         return false;
     }
     m_commandManager.CreateCommandManager();
 
+    // Render 3D
     if (!m_render3D.Init(m_windowWP, &m_graphicsDevice, &m_descriptorManager, &m_commandManager)) 
     {
         return false;
@@ -48,12 +52,8 @@ void RenderingManager::RecordCommands()
     // On fixe le RTV sur la bonne frame 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorManager.GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), m_graphicsDevice.GetFrameIndex(), m_descriptorManager.GetRtvDescriptorSize());
 
-
-
     // Classes Render
     m_render3D.RecordCommands();
-
-
 
     // Transition du back buffer de RENDER_TARGET a PRESENT pour la presentation
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_graphicsDevice.GetRenderTargetResource(m_graphicsDevice.GetFrameIndex()), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -78,7 +78,8 @@ void RenderingManager::SignalAndWait()
 {
     m_commandManager.GetFenceValue()++;
     m_graphicsDevice.GetCommandQueue()->Signal(m_commandManager.GetFence().Get(), m_commandManager.GetFenceValue());
-    if (m_commandManager.GetFence()->GetCompletedValue() < m_commandManager.GetFenceValue()) {
+    if (m_commandManager.GetFence()->GetCompletedValue() < m_commandManager.GetFenceValue()) 
+    {
         m_commandManager.GetFence()->SetEventOnCompletion(m_commandManager.GetFenceValue(), m_commandManager.GetFenceEvent());
         WaitForSingleObject(m_commandManager.GetFenceEvent(), INFINITE);
     }

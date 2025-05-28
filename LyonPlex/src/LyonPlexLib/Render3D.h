@@ -2,11 +2,7 @@
 
 #include "IRender.h"
 #include "GraphicsPipeline.h"
-
-struct Vertex {
-	XMFLOAT3 position;
-	XMFLOAT4 color;
-};
+#include "MeshManager.h"
 
 class Render3D : public IRender
 {
@@ -25,7 +21,7 @@ private:
 	HWND m_windowWP;
 
 	GraphicsPipeline m_graphicsPipeline;
-
+	MeshManager m_meshManager;
 
 
 	// mesh

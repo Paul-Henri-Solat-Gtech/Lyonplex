@@ -9,8 +9,7 @@ bool Render3D::Init(HWND windowHandle, GraphicsDevice* graphicsDevice, Descripto
 	m_windowWP = windowHandle;
 
 	m_graphicsPipeline.Init(mp_graphicsDevice, mp_descriptorManager, mp_commandManager);
-
-
+	m_meshManager.Init(mp_graphicsDevice);
 
 	return true;
 }
@@ -36,8 +35,6 @@ void Render3D::RecordCommands()
 	// Le scissor défini un rectangle de pixels à dessiner dans la zone de dessin (viewport). Tous les pixels en dehors de cette zone ne sont pas dessinés.
 	D3D12_RECT scissorRect = { 0, 0, 800, 600 };
 
-	// ### BLOC DESSIN QUI N EST PAS COMMUN A 3D, 2D ET UI
-
 	// On définie la pipeline et la rootSignature
 	mp_commandManager->GetCommandList()->SetGraphicsRootSignature(m_graphicsPipeline.GetRootSignature().Get());
 	mp_commandManager->GetCommandList()->SetPipelineState(m_graphicsPipeline.GetPipelineState().Get());
@@ -45,7 +42,6 @@ void Render3D::RecordCommands()
 	// Actualisation du rectangle dans lequel on dessine, dans la fenetre
 	mp_commandManager->GetCommandList()->RSSetViewports(1, &viewport);
 	mp_commandManager->GetCommandList()->RSSetScissorRects(1, &scissorRect);
-
 
 	UINT frameIndex = mp_graphicsDevice->GetFrameIndex();
 	// calcule à la volée le handle CPU vers le i-ème RTV
@@ -59,12 +55,12 @@ void Render3D::RecordCommands()
 	mp_commandManager->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 	// Ajouter ClearDepthStencilView() quand on l'aura ajouté a la pipeline
 
-
 	//Draw vertices (mesh)
 	mp_commandManager->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-	mp_commandManager->GetCommandList()->DrawInstanced(3, 1, 0, 0);
-
+	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_meshManager.GetVertexBufferView());
+	mp_commandManager->GetCommandList()->IASetIndexBuffer(&m_meshManager.GetIndexBufferView());
+	//mp_commandManager->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+	mp_commandManager->GetCommandList()->DrawIndexedInstanced(3, 1, 0, 0, 0);
 }
 
 void Render3D::CreatePipeline()
@@ -72,25 +68,25 @@ void Render3D::CreatePipeline()
 	m_graphicsPipeline.CreatePipeline();
 
 	//--------------------------------------------------- Draw a triangle
-	Vertex triangle[] = {
-		{{ 0.0f,  0.25f, 0.0f},{1,0,0,1}},
-		{{ 0.25f,-0.25f, 0.0f},{0,1,0,1}},
-		{{-0.25f,-0.25f, 0.0f},{0,0,1,1}},
-	};
-	const UINT vbSize = sizeof(triangle);
-	CD3DX12_HEAP_PROPERTIES hp(D3D12_HEAP_TYPE_UPLOAD);
-	CD3DX12_RESOURCE_DESC rd = CD3DX12_RESOURCE_DESC::Buffer(vbSize);
-	mp_graphicsDevice->GetDevice()->CreateCommittedResource(&hp, D3D12_HEAP_FLAG_NONE, &rd,
-		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_vertexBuffer));
+	//Vertex triangle[] = {
+	//	{{ 0.0f,  0.25f, 0.0f},{1,0,0,1}},
+	//	{{ 0.25f,-0.25f, 0.0f},{0,1,0,1}},
+	//	{{-0.25f,-0.25f, 0.0f},{0,0,1,1}},
+	//};
+	//const UINT vbSize = sizeof(triangle);
+	//CD3DX12_HEAP_PROPERTIES hp(D3D12_HEAP_TYPE_UPLOAD);
+	//CD3DX12_RESOURCE_DESC rd = CD3DX12_RESOURCE_DESC::Buffer(vbSize);
+	//mp_graphicsDevice->GetDevice()->CreateCommittedResource(&hp, D3D12_HEAP_FLAG_NONE, &rd,
+	//	D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_vertexBuffer));
 
-	void* p;
-	m_vertexBuffer->Map(0, nullptr, &p);
-	memcpy(p, triangle, vbSize);
-	m_vertexBuffer->Unmap(0, nullptr);
+	//void* p;
+	//m_vertexBuffer->Map(0, nullptr, &p);
+	//memcpy(p, triangle, vbSize);
+	//m_vertexBuffer->Unmap(0, nullptr);
 
-	m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-	m_vertexBufferView.SizeInBytes = vbSize;
-	m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+	//m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+	//m_vertexBufferView.SizeInBytes = vbSize;
+	//m_vertexBufferView.StrideInBytes = sizeof(Vertex);
 	//----------------------------------------------------- Pour test
 
 }

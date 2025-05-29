@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "MeshManager.h"
 
 void MeshManager::Init(GraphicsDevice* graphicsDevice)
@@ -6,6 +6,7 @@ void MeshManager::Init(GraphicsDevice* graphicsDevice)
 	mp_graphicsDevice = graphicsDevice;
 
 	// Initialisation de tous les mesh
+	InitializeMesh_Square();
 	InitializeMesh_Triangle();
 	// ...
 
@@ -19,7 +20,7 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 	m_globalVertices.clear();
 	m_globalIndices.clear();
 
-	// (Optionnel) réserver d'avance pour optimiser
+	// (Optionnel) ré§¸erver d'avance pour optimiser
 	UINT totalVerts = 0, totalInds = 0;
 	for (auto& m : m_meshList) {
 		totalVerts += static_cast<UINT>(m->m_meshParamTabl.size());
@@ -32,7 +33,7 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 	UINT vCursor = 0, iCursor = 0;
 	for (auto& m : m_meshList)
 	{
-		// mettre à jour offsets/sizes
+		// mettre ãƒ»jour offsets/sizes
 		m->m_vOffset = vCursor;
 		m->m_vSize = static_cast<UINT>(m->m_meshParamTabl.size());
 		m->m_iOffset = iCursor;
@@ -44,14 +45,15 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 
 		// copier les indices avec correction d'offset
 		for (uint16_t idx : m->m_indexTabl)
-			m_globalIndices.push_back(static_cast<uint16_t>(idx + vCursor));
+			//m_globalIndices.push_back(static_cast<uint16_t>(idx + vCursor)); ne vas pas avec la boucle de render3D (!)
+			m_globalIndices.push_back(idx);
 
 		vCursor += m->m_vSize;
 		iCursor += m->m_iSize;
 	}
 
-	// 2) Création et upload buffers GPU
-	// Ta logique D3D12 répétée pour vertex et index, sans passer par arguments
+	// 2) CrÃ©ation et upload buffers GPU
+	// Ta logique D3D12 ré§±é¨é¦¥ pour vertex et index, sans passer par arguments
 	UINT vByteSize = UINT(m_globalVertices.size() * sizeof(MeshParam));
 	UINT iByteSize = UINT(m_globalIndices.size() * sizeof(uint16_t));
 	D3D12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
@@ -131,6 +133,50 @@ void MeshManager::InitializeMesh_Triangle()
 			newMesh->m_indexTabl.push_back(indices[i]);
 		}
 		newMesh->m_iSize = i;
+	}
+
+	m_meshList.push_back(newMesh);
+}
+
+void MeshManager::InitializeMesh_Square()
+{
+	Mesh* newMesh = new Mesh;
+
+	MeshParam square[] =
+	{
+		// coin haut-gauche
+		{{ -0.25f, 0.25f, 0.0f},{5,1,0,1}},
+		// coin bas-gauche
+		{{ -0.25f, -0.25f, 0.0f},{0,0,0,1}},
+		// coin bas-droit
+		{{ 0.25f, -0.25f, 0.0f},{0,0,0,1}},
+		// coin haut-droit
+		{{ 0.25f, 0.25f, 0.0f},{0,0,0,1}},
+	};
+
+	{
+		for (int i = 0; i < _countof(square); i++) 
+		{
+			newMesh->m_meshParamTabl.push_back(new MeshParam(square[i]));
+		}
+
+		newMesh->m_vSize = static_cast<UINT>(_countof(square));
+	}
+
+	// Definition des indices pour dessiner 2 triangles
+	uint16_t indices[] = 
+	{ 
+		0, 2, 1,  // triangle bas-gauche â†’ bas-droit
+		0, 3, 2   // triangle bas-gauche â†’ haut-droit
+	};
+
+	{
+		for (int i = 0; i < _countof(indices); i++)
+		{
+			newMesh->m_indexTabl.push_back(indices[i]);
+		}
+		//newMesh->m_iSize = i;
+		newMesh->m_iSize = static_cast<UINT>(_countof(indices));
 	}
 
 	m_meshList.push_back(newMesh);

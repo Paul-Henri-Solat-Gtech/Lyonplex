@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "GraphicsDevice.h"
 
@@ -6,8 +6,8 @@ struct MeshParam
 {
 	DirectX::XMFLOAT3 Position;		// Position des points
 	DirectX::XMFLOAT4 Color;		// Couleur des points
-	//DirectX::XMFLOAT2 TexCoord;	// Coordonées du point sur la texture ?
-	//DirectX::XMFLOAT3 Normal;		// Normale à la face visible du mesh (vecteur de direction)
+	//DirectX::XMFLOAT2 TexCoord;	// CoordonÃ©es du point sur la texture ?
+	//DirectX::XMFLOAT3 Normal;		// Normale ãƒ»la face visible du mesh (vecteur de direction)
 };
 
 struct Mesh
@@ -29,12 +29,13 @@ public:
 	D3D12_VERTEX_BUFFER_VIEW& GetGlobalVBView() { return m_globalVBView; };
 	D3D12_INDEX_BUFFER_VIEW& GetGlobalIBView() { return m_globalIBView; };
 
+	std::vector<Mesh*>& GetMeshList() { return m_meshList; };
+
 private:
 
 	HRESULT BuildAndUploadGlobalBuffers();
 
 	void InitializeMesh_Triangle();
-	void InitializeMesh_Test();
 	void InitializeMesh_Square();
 	void InitializeMesh_Cube();
 

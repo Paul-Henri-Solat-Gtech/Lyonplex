@@ -6,6 +6,8 @@ public:
 
 	void CreateCommandManager();
 
+	void ResetCommands();
+
 	ComPtr<ID3D12CommandAllocator>& GetCommandAllocator() { return m_commandAllocator; };
 	ComPtr<ID3D12GraphicsCommandList>& GetCommandList() { return m_commandList; };
 	ComPtr<ID3D12Fence>& GetFence() { return m_fence; };

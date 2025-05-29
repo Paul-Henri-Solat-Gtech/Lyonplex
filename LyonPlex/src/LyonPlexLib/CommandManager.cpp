@@ -17,6 +17,13 @@ void CommandManager::CreateCommandManager()
     CreateFence();
 }
 
+void CommandManager::ResetCommands()
+{
+    // Reset CmdAlloc et CmdList
+    m_commandAllocator.Get()->Reset();
+    m_commandList.Get()->Reset(m_commandAllocator.Get(), nullptr);
+}
+
 void CommandManager::CreateCommandAllocator()
 {
     // Allocator

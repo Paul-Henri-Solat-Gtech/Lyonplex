@@ -4,33 +4,21 @@
 
 struct MeshParam
 {
-	DirectX::XMFLOAT3 Position;
-	//DirectX::XMFLOAT3 Normal;
-	DirectX::XMFLOAT4 Color;
-	//DirectX::XMFLOAT2 TexCoord;
+	DirectX::XMFLOAT3 Position;		// Position des points
+	DirectX::XMFLOAT4 Color;		// Couleur des points
+	//DirectX::XMFLOAT2 TexCoord;	// Coordonées du point sur la texture ?
+	//DirectX::XMFLOAT3 Normal;		// Normale à la face visible du mesh (vecteur de direction)
 };
-struct GeometryMesh
-{
-	ComPtr<ID3D12Resource> m_vertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
 
-	ComPtr<ID3D12Resource> m_indexBuffer;
-	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
-
-	// Nombre d'indices pour le rendu
-	UINT m_meshIndex;
-};
 struct Mesh
 {
-	// typeOf Geometry
-	GeometryMesh m_geometryMesh;
+	std::vector<MeshParam*> m_meshParamTabl;
+	UINT m_vSize = 0;
+	UINT m_vOffset = 0;
 
-	// Buffer de constantes (matrices, couleurs, etc.)
-	ComPtr<ID3D12Resource> m_constantBuffer;
-
-	float width, height;
-
-	void* m_mappedData = nullptr;
+	std::vector<uint16_t> m_indexTabl;
+	UINT m_iSize = 0;
+	UINT m_iOffset = 0;
 };
 
 class MeshManager
@@ -38,30 +26,32 @@ class MeshManager
 public:
 	void Init(GraphicsDevice* graphicsDevice);
 
-	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() { return m_vertexBufferView; };
-	D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() { return m_indexBufferView; };
+	D3D12_VERTEX_BUFFER_VIEW& GetGlobalVBView() { return m_globalVBView; };
+	D3D12_INDEX_BUFFER_VIEW& GetGlobalIBView() { return m_globalIBView; };
 
 private:
-	void AddNewMesh(MeshParam vertices[], size_t vertexCount, uint16_t indices[], size_t indexCount);
+
+	HRESULT BuildAndUploadGlobalBuffers();
 
 	void InitializeMesh_Triangle();
+	void InitializeMesh_Test();
 	void InitializeMesh_Square();
 	void InitializeMesh_Cube();
 
 	GraphicsDevice* mp_graphicsDevice;
 
-	// Contient tous les mesh en un tableau (not built yet)
-	void* m_pVertexData = nullptr;
-	void* m_pIndexData = nullptr;
+	//std::vector<MeshParam*> m_meshList;
+	std::vector<Mesh*> m_meshList;
 
-	//
-	ComPtr<ID3D12Resource> m_vertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+	// Variables de Vertex et Index globales
+	ComPtr<ID3D12Resource> m_globalVertexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW m_globalVBView;
 
-	ComPtr<ID3D12Resource> m_indexBuffer;
-	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+	ComPtr<ID3D12Resource> m_globalIndexBuffer;
+	D3D12_INDEX_BUFFER_VIEW m_globalIBView;
 
-	// Nombre d'indices pour le rendu
-	UINT m_meshIndex;
+	// Buffers globaux (membres de la classe)
+	std::vector<MeshParam> m_globalVertices;
+	std::vector<uint16_t>  m_globalIndices;
 };
 

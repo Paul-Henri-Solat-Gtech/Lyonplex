@@ -38,7 +38,7 @@ bool RenderingManager::Init()
 
 void RenderingManager::RecordCommands()
 {
-    ResetCommands();
+    m_commandManager.ResetCommands();
 
     // Barrier pour faire la transition du back buffer de l'etat PRESENT a RENDER_TARGET
     CD3DX12_RESOURCE_BARRIER barrier;
@@ -58,15 +58,6 @@ void RenderingManager::RecordCommands()
 }
 
 
-
-
-void RenderingManager::ResetCommands()
-{
-    // Reset CmdAlloc et CmdList
-    m_commandManager.GetCommandAllocator()->Reset();
-    m_commandManager.GetCommandList()->Reset(m_commandManager.GetCommandAllocator().Get(), nullptr);
-    //mp_commandManager->GetCommandList()->Reset(mp_commandManager->GetCommandAllocator().Get(), m_graphicsPipeline.GetPipelineState().Get());
-}
 void RenderingManager::SetBarrierToRenderTarget(CD3DX12_RESOURCE_BARRIER& barrier)
 {
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_graphicsDevice.GetRenderTargetResource(m_graphicsDevice.GetFrameIndex()), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);

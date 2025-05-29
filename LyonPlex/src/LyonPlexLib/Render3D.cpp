@@ -57,9 +57,11 @@ void Render3D::RecordCommands()
 
 	//Draw vertices (mesh)
 	mp_commandManager->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_meshManager.GetVertexBufferView());
-	mp_commandManager->GetCommandList()->IASetIndexBuffer(&m_meshManager.GetIndexBufferView());
-	mp_commandManager->GetCommandList()->DrawIndexedInstanced(3, 1, 0, 0, 0);
+	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_meshManager.GetGlobalVBView());
+	mp_commandManager->GetCommandList()->IASetIndexBuffer(&m_meshManager.GetGlobalIBView());
+	
+	// Ligne à répéter dans une boucle d'itération sur les entités
+	mp_commandManager->GetCommandList()->DrawIndexedInstanced(3, 1, 0, 0, 0); // Arguments à changer : vSize   // InstanceCount   // iOffset   // vOffset    // StartInstanceLocation (0)
 }
 
 void Render3D::CreatePipeline()

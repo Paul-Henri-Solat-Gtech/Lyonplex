@@ -7,6 +7,7 @@ void MeshManager::Init(GraphicsDevice* graphicsDevice)
 
 	// Initialisation de tous les mesh
 	InitializeMesh_Square();
+	InitializeMesh_Cube();
 	InitializeMesh_Triangle();
 	// ...
 
@@ -45,7 +46,7 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 
 		// copier les indices avec correction d'offset
 		for (uint16_t idx : m->m_indexTabl)
-			//m_globalIndices.push_back(static_cast<uint16_t>(idx + vCursor)); ne vas pas avec la boucle de render3D (!)
+			//m_globalIndices.push_back(static_cast<uint16_t>(idx + vCursor)); //ne vas pas avec la boucle de render3D (!)
 			m_globalIndices.push_back(idx);
 
 		vCursor += m->m_vSize;
@@ -110,8 +111,8 @@ void MeshManager::InitializeMesh_Triangle()
 	};
 
 	{
-		int i = 0;
-		for (; i < _countof(triangle); i++)
+		int i;
+		for (i = 0; i < _countof(triangle); i++)
 		{
 			// 1) allouer un nouvel objet
 			MeshParam* nMesh = new MeshParam;
@@ -127,8 +128,8 @@ void MeshManager::InitializeMesh_Triangle()
 	uint16_t indices[] = { 0, 1, 2 };
 
 	{
-		int i = 0;
-		for (; i < _countof(triangle); i++)
+		int i;
+		for (i = 0; i < _countof(triangle); i++)
 		{
 			newMesh->m_indexTabl.push_back(indices[i]);
 		}
@@ -155,12 +156,17 @@ void MeshManager::InitializeMesh_Square()
 	};
 
 	{
-		for (int i = 0; i < _countof(square); i++) 
+		int i;
+		for (i = 0; i < _countof(square); i++) 
 		{
-			newMesh->m_meshParamTabl.push_back(new MeshParam(square[i]));
+			// 1) allouer un nouvel objet
+			MeshParam* nMesh = new MeshParam;
+			// 2) copier le contenu de triangle[i] dans votre nMesh
+			*nMesh = square[i];
+			// 3) pousser la copie dans le vecteur
+			newMesh->m_meshParamTabl.push_back(nMesh);
 		}
-
-		newMesh->m_vSize = static_cast<UINT>(_countof(square));
+		newMesh->m_vSize = i;
 	}
 
 	// Definition des indices pour dessiner 2 triangles
@@ -171,12 +177,74 @@ void MeshManager::InitializeMesh_Square()
 	};
 
 	{
-		for (int i = 0; i < _countof(indices); i++)
+		int i;
+		for (i = 0; i < _countof(indices); i++)
 		{
 			newMesh->m_indexTabl.push_back(indices[i]);
 		}
-		//newMesh->m_iSize = i;
-		newMesh->m_iSize = static_cast<UINT>(_countof(indices));
+		newMesh->m_iSize = i;
+	}
+
+	m_meshList.push_back(newMesh);
+}
+
+void MeshManager::InitializeMesh_Cube()
+{
+	Mesh* newMesh = new Mesh;
+
+	MeshParam cube[] =
+	{
+		// Face avant
+		{{ -0.25f,  0.25f, -0.25f },{1,0,0,1}}, // 0
+		{{ -0.25f, -0.25f, -0.25f },{0,1,0,1}}, // 1
+		{{  0.25f, -0.25f, -0.25f },{0,0,1,1}}, // 2
+		{{  0.25f,  0.25f, -0.25f },{1,1,0,1}}, // 3
+
+		// Face arrière
+		{{ -0.25f,  0.25f,  0.25f },{1,0,1,1}}, // 4
+		{{ -0.25f, -0.25f,  0.25f },{0,1,1,1}}, // 5
+		{{  0.25f, -0.25f,  0.25f },{1,1,1,1}}, // 6
+		{{  0.25f,  0.25f,  0.25f },{0,0,0,1}}, // 7
+	};
+
+	{
+		int i;
+		for (i = 0; i < _countof(cube); i++)
+		{
+			// 1) allouer un nouvel objet
+			MeshParam* nMesh = new MeshParam;
+			// 2) copier le contenu de triangle[i] dans votre nMesh
+			*nMesh = cube[i];
+			// 3) pousser la copie dans le vecteur
+			newMesh->m_meshParamTabl.push_back(nMesh);
+		}
+		newMesh->m_vSize = i;
+	}
+
+	// Definition des indices pour dessiner 2 triangles
+	uint16_t indices[] =
+	{
+		// Face avant
+		0, 1, 2,  0, 2, 3,
+		// Face arrière
+		4, 6, 5,  4, 7, 6,
+		// Face gauche
+		4, 5, 1,  4, 1, 0,
+		// Face droite
+		3, 2, 6,  3, 6, 7,
+		// Face haut
+		4, 0, 3,  4, 3, 7,
+		// Face bas
+		1, 5, 6,  1, 6, 2
+	};
+
+	{
+		int i;
+		for (i = 0; i < _countof(indices); i++)
+		{
+			newMesh->m_indexTabl.push_back(indices[i]);
+		}
+		newMesh->m_iSize = i;
 	}
 
 	m_meshList.push_back(newMesh);

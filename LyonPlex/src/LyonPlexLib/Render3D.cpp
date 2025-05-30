@@ -70,6 +70,7 @@ void Render3D::RecordCommands()
 			1,
 			mesh->m_iOffset,    // offset dans le buffer d’indices
 			mesh->m_vOffset,    // BaseVertexLocation = 0 !
+			//0,
 			0
 		);
 	}

@@ -52,8 +52,6 @@ void GraphicsDevice::CreateSwapChain()
         m_commandQueue.Get(), m_windowWP, &scDesc, nullptr, nullptr, &tempSwapChain);
     tempSwapChain.As(&m_swapChain);
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-
-    
 }
 
 void GraphicsDevice::SetRenderTargets(DescriptorManager* descManager)

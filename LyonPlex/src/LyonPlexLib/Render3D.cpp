@@ -11,6 +11,14 @@ bool Render3D::Init(HWND windowHandle, GraphicsDevice* graphicsDevice, Descripto
 	m_graphicsPipeline.Init(mp_graphicsDevice, mp_descriptorManager, mp_commandManager);
 	m_meshManager.Init(mp_graphicsDevice);
 
+	//changer emplacement init camera
+	mp_cameraManager = new CameraManager();
+	mp_cameraManager->Init();
+	mp_cameraManager->SetPosition({ 0.0f, 0.0f, -2.0f });
+	mp_cameraManager->SetDirection({ 0.0f, 0.0f, 1.0f });
+	mp_cameraManager->UpdateProjectionMatrix(90.0f, 800.f / 600.f, 0.1f, 1000.f);
+	CreateCameraBuffer();
+
 	return true;
 }
 
@@ -55,6 +63,24 @@ void Render3D::RecordCommands()
 	mp_commandManager->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 	// Ajouter ClearDepthStencilView() quand on l'aura ajouté a la pipeline
 
+	//----camtest
+	// 1) Met à jour la vue
+	mp_cameraManager->UpdateViewMatrix();
+
+	// 2) Récupère directement le CameraBuffer (déjà transposé)
+	CameraBuffer cbData = mp_cameraManager->GetCameraBuffer();
+
+	// 3) Upload en une fois dans le CBV
+	UINT8* mapped = nullptr;
+	CD3DX12_RANGE readRange(0, 0);
+	m_cameraCB->Map(0, &readRange, reinterpret_cast<void**>(&mapped));
+	memcpy(mapped, &cbData, sizeof(cbData));
+	m_cameraCB->Unmap(0, nullptr);
+
+	// 4) Bind au slot b0
+	mp_commandManager->GetCommandList()->SetGraphicsRootConstantBufferView(0, m_cameraCB->GetGPUVirtualAddress());
+	//----camtest
+
 	//Draw vertices (mesh)
 	mp_commandManager->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_meshManager.GetGlobalVBView());
@@ -91,4 +117,48 @@ void Render3D::Release()
 
 	mp_commandManager = nullptr;
 	delete mp_commandManager;
+
+	mp_cameraManager = nullptr;
+	delete mp_cameraManager;
+}
+
+//cam temp
+void Render3D::UpdateTemp()
+{
+	float deltaTime = 1.0f / 60.0f;
+	float speed = 0.2;
+	if(GetAsyncKeyState('Z') & 0x8000)
+		mp_cameraManager->MoveForward(speed * deltaTime);
+	if (GetAsyncKeyState('S') & 0x8000)
+		mp_cameraManager->MoveForward(-speed * deltaTime);
+	if (GetAsyncKeyState('D') & 0x8000)
+		mp_cameraManager->MoveRight(speed * deltaTime);
+	if (GetAsyncKeyState('Q') & 0x8000)
+		mp_cameraManager->MoveRight(-speed * deltaTime);
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+		mp_cameraManager->MoveUp(speed * deltaTime); // À créer si pas déjà là
+	if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+		mp_cameraManager->MoveUp(-speed * deltaTime); // descend
+
+	mp_cameraManager->UpdateViewMatrix();
+
+	XMFLOAT3 pos = mp_cameraManager->GetPosition();
+	wchar_t title[128];
+	swprintf(title, 128, L"MonJeuDX12 - Caméra [X: %.2f, Y: %.2f, Z: %.2f]", pos.x, pos.y, pos.z);
+
+	::SetWindowText(m_windowWP, title); // windowHandle doit être un HWND valide
+
+}
+
+//cam temp
+void Render3D::CreateCameraBuffer()
+{
+	UINT64 sizeCB = (sizeof(CameraBuffer) + 255) & ~255;
+	CD3DX12_HEAP_PROPERTIES hp(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC rd = CD3DX12_RESOURCE_DESC::Buffer(sizeCB);
+
+	mp_graphicsDevice->GetDevice()->CreateCommittedResource(
+		&hp, D3D12_HEAP_FLAG_NONE, &rd,
+		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+		IID_PPV_ARGS(&m_cameraCB));
 }

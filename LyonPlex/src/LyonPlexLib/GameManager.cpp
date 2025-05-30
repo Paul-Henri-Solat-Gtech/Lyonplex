@@ -45,6 +45,8 @@ int GameManager::Run()
             TranslateMessage(&msg); // Prépare le message (gestion du clavier, etc.)
             DispatchMessage(&msg); // Appelle la WindowProcedure correspondante
         }
+        // UPDATE
+        m_renderer.UpdateTemp();
 
         // Enregistrement et envoi des commandes
         

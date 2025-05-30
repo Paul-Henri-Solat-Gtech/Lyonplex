@@ -3,6 +3,7 @@
 #include "IRender.h"
 #include "GraphicsPipeline.h"
 #include "MeshManager.h"
+#include "CameraManager.h"
 
 class Render3D : public IRender
 {
@@ -16,6 +17,9 @@ public:
 
 	void Release();
 
+	//camera
+	void UpdateTemp();
+
 private:
 	HWND m_windowWP;
 
@@ -25,5 +29,10 @@ private:
 
 	GraphicsPipeline m_graphicsPipeline;
 	MeshManager m_meshManager;
+
+	//Camera (temp)
+	CameraManager* mp_cameraManager;           // ← ta caméra
+	ComPtr<ID3D12Resource> m_cameraCB;  // ← constant buffer pour la caméra
+	void CreateCameraBuffer();
 };
 

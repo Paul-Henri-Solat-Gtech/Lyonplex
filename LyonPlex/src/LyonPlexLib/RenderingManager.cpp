@@ -98,3 +98,8 @@ void RenderingManager::Release()
     m_render3D.Release();
 }
 
+void RenderingManager::UpdateTemp()
+{
+    m_render3D.UpdateTemp();
+}
+

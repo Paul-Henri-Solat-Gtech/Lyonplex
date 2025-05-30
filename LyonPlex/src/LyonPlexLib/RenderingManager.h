@@ -23,6 +23,9 @@ public:
 
 	void Release();
 
+	//Temp
+	void UpdateTemp();
+
 private:
 	
 	HWND m_windowWP;		// The created base window (pour le swapchain)

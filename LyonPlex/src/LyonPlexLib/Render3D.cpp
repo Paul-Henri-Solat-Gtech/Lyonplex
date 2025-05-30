@@ -68,3 +68,10 @@ void Render3D::CreatePipeline()
 {
 	m_graphicsPipeline.CreatePipeline();
 }
+
+void Render3D::Release()
+{
+	delete mp_graphicsDevice;
+	delete mp_descriptorManager;
+	delete mp_commandManager;
+}

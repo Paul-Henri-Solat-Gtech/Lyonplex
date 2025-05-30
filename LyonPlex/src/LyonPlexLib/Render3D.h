@@ -14,6 +14,8 @@ public:
 
 	GraphicsPipeline GetGraphicsPipeline() { return m_graphicsPipeline; };
 
+	void Release();
+
 private:
 	GraphicsDevice* mp_graphicsDevice;
 	DescriptorManager* mp_descriptorManager;

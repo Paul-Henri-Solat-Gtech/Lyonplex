@@ -6,7 +6,14 @@ public:
 
 	void CreateCommandManager();
 
-	void ResetCommands();
+	void Begin();
+
+	void End();
+
+	void ExecuteCmdLists();
+
+	void SignalAndWait();
+
 
 	ComPtr<ID3D12CommandAllocator>& GetCommandAllocator() { return m_commandAllocator; };
 	ComPtr<ID3D12GraphicsCommandList>& GetCommandList() { return m_commandList; };

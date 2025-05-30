@@ -14,6 +14,29 @@ void MeshManager::Init(GraphicsDevice* graphicsDevice)
 	BuildAndUploadGlobalBuffers();
 }
 
+void MeshManager::AddNewMeshToList(Mesh* newMesh, MeshParam triangle[], uint16_t indices[], int triangleSize, int indiceSize)
+{
+	int i;
+	for (i = 0; i < triangleSize; i++)
+	{
+		// 1) allouer un nouvel objet
+		MeshParam* nMesh = new MeshParam;
+		// 2) copier le contenu de triangle[i] dans votre nMesh
+		*nMesh = triangle[i];
+		// 3) pousser la copie dans le vecteur
+		newMesh->m_meshParamTabl.push_back(nMesh);
+	}
+	newMesh->m_vSize = i;
+
+	for (i = 0; i < indiceSize; i++)
+	{
+		newMesh->m_indexTabl.push_back(indices[i]);
+	}
+	newMesh->m_iSize = i;
+
+	m_meshList.push_back(newMesh);
+}
+
 HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 {
 	m_globalVertices.clear();
@@ -59,7 +82,7 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 	// Vertex buffer
 	{
 		auto vbDesc = CD3DX12_RESOURCE_DESC::Buffer(vByteSize);
-		HRESULT hr = mp_graphicsDevice->GetDevice()->CreateCommittedResource( &heapProps, D3D12_HEAP_FLAG_NONE, &vbDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_globalVertexBuffer));
+		HRESULT hr = mp_graphicsDevice->GetDevice()->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &vbDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_globalVertexBuffer));
 		if (FAILED(hr)) return hr;
 
 		void* pData = nullptr;
@@ -77,7 +100,7 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 	// Index buffer
 	{
 		auto ibDesc = CD3DX12_RESOURCE_DESC::Buffer(iByteSize);
-		HRESULT hr = mp_graphicsDevice->GetDevice()->CreateCommittedResource( &heapProps, D3D12_HEAP_FLAG_NONE, &ibDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_globalIndexBuffer));
+		HRESULT hr = mp_graphicsDevice->GetDevice()->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &ibDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_globalIndexBuffer));
 		if (FAILED(hr)) return hr;
 
 		void* pData = nullptr;
@@ -107,31 +130,9 @@ void MeshManager::InitializeMesh_Triangle()
 		{{-0.25f,-0.25f, 0.0f},{0,0,0,1}},
 	};
 
-	{
-		int i = 0;
-		for (; i < _countof(triangle); i++)
-		{
-			// 1) allouer un nouvel objet
-			MeshParam* nMesh = new MeshParam;
-			// 2) copier le contenu de triangle[i] dans votre nMesh
-			*nMesh = triangle[i];
-			// 3) pousser la copie dans le vecteur
-			newMesh->m_meshParamTabl.push_back(nMesh);
-		}
-		newMesh->m_vSize = i;
-	}
-
 	// Definition des indices pour dessiner 2 triangles
 	uint16_t indices[] = { 0, 1, 2 };
 
-	{
-		int i = 0;
-		for (; i < _countof(triangle); i++)
-		{
-			newMesh->m_indexTabl.push_back(indices[i]);
-		}
-		newMesh->m_iSize = i;
-	}
 
-	m_meshList.push_back(newMesh);
+	AddNewMeshToList(newMesh, triangle, indices, _countof(triangle), _countof(indices));
 }

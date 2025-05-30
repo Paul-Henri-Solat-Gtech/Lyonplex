@@ -17,11 +17,33 @@ void CommandManager::CreateCommandManager()
     CreateFence();
 }
 
-void CommandManager::ResetCommands()
+void CommandManager::Begin()
 {
     // Reset CmdAlloc et CmdList
     m_commandAllocator.Get()->Reset();
     m_commandList.Get()->Reset(m_commandAllocator.Get(), nullptr);
+}
+
+void CommandManager::End()
+{
+    m_commandList->Close();
+}
+
+void CommandManager::ExecuteCmdLists()
+{
+    ID3D12CommandList* cmdLists[] = { m_commandList.Get() };
+    mp_graphicsDevice->GetCommandQueue()->ExecuteCommandLists(1, cmdLists);
+}
+
+void CommandManager::SignalAndWait()
+{
+    m_fenceValue++;
+    mp_graphicsDevice->GetCommandQueue()->Signal(m_fence.Get(), m_fenceValue);
+    if (m_fence->GetCompletedValue() < m_fenceValue)
+    {
+        m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent);
+        WaitForSingleObject(m_fenceEvent, INFINITE);
+    }
 }
 
 void CommandManager::CreateCommandAllocator()
@@ -46,5 +68,6 @@ void CommandManager::CreateFence()
 
 void CommandManager::Release()
 {
-
+    delete mp_graphicsDevice;
+    delete mp_descriptorManager;
 }

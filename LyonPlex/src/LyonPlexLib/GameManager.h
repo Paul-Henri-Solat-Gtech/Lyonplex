@@ -17,7 +17,6 @@ public:
 
 private:
     void ProcessMessage(); // Gestion messages windows
-    void WaitForPreviousFrame(); // synchronise gpu et cpu
 
     HINSTANCE m_hInstance;
     WindowPlex m_window;

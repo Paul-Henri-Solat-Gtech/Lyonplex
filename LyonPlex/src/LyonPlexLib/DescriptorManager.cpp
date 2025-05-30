@@ -57,5 +57,5 @@ void DescriptorManager::CreateSamplerHeap(UINT numDescriptors)
 
 void DescriptorManager::Release()
 {
-
+    delete mp_graphicsDevice;
 }

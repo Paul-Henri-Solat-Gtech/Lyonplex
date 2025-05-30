@@ -57,5 +57,6 @@ void DescriptorManager::CreateSamplerHeap(UINT numDescriptors)
 
 void DescriptorManager::Release()
 {
+    mp_graphicsDevice = nullptr;
     delete mp_graphicsDevice;
 }

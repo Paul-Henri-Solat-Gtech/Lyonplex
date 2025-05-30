@@ -68,6 +68,9 @@ void CommandManager::CreateFence()
 
 void CommandManager::Release()
 {
+    mp_graphicsDevice = nullptr;
     delete mp_graphicsDevice;
+
+    mp_descriptorManager = nullptr;
     delete mp_descriptorManager;
 }

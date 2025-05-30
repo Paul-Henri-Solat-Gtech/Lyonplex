@@ -61,7 +61,14 @@ int GameManager::Run()
         m_renderer.SynchroGPUCPU();
     }
 
+    Release();
+
     return static_cast<int>(msg.wParam);
+}
+
+void GameManager::Release()
+{
+    m_renderer.Release();
 }
 
 

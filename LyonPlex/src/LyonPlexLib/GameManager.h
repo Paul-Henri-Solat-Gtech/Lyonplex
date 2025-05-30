@@ -15,6 +15,8 @@ public:
     // Boucle principale
     int Run();
 
+    void Release();
+
 private:
     void ProcessMessage(); // Gestion messages windows
 

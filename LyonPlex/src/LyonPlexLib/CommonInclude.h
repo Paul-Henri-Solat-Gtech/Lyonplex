@@ -13,6 +13,7 @@
 #include <d3dcompiler.h>
 #include <stdexcept>
 #include <vector>
+#include <unordered_map>
 
 //Lib DX12
 #pragma comment(lib, "d3d12.lib")
@@ -30,3 +31,4 @@ using namespace DirectX;
 //CLASS OF LYONPLEX
 #include "WindowPlex.h"
 #include "GameManager.h"
+

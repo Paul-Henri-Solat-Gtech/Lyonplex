@@ -80,3 +80,15 @@ void Render3D::CreatePipeline()
 {
 	m_graphicsPipeline.CreatePipeline();
 }
+
+void Render3D::Release()
+{
+	mp_graphicsDevice = nullptr;
+	delete mp_graphicsDevice;
+
+	mp_descriptorManager = nullptr;
+	delete mp_descriptorManager;
+
+	mp_commandManager = nullptr;
+	delete mp_commandManager;
+}

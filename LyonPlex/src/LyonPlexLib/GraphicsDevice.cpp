@@ -60,10 +60,6 @@ void GraphicsDevice::SetRenderTargets(DescriptorManager* descManager)
 { 
     m_renderTargets.resize(FRAMECOUNT);
 
-    // Render targets
-    //CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descManager->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart());
-    //m_rtvHandle = rtvHandle;
-
     for (UINT i = 0; i < FRAMECOUNT; i++)
     {
         m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
@@ -74,6 +70,13 @@ void GraphicsDevice::SetRenderTargets(DescriptorManager* descManager)
         m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, RtvHandle);
         m_rtvHandle.Offset(1, descManager->GetRtvDescriptorSize());
     }
+}
+
+
+void GraphicsDevice::Present()
+{
+    m_swapChain->Present(1, 0);
+    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 }
 
 void GraphicsDevice::Release()

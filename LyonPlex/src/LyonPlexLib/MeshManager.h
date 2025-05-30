@@ -33,6 +33,8 @@ public:
 
 private:
 
+	void AddNewMeshToList(Mesh* newMesh, MeshParam triangle[], uint16_t indices[], int triangleSize, int indiceSize);
+
 	HRESULT BuildAndUploadGlobalBuffers();
 
 	void InitializeMesh_Triangle();

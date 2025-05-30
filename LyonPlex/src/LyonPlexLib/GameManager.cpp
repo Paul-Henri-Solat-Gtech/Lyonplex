@@ -58,17 +58,19 @@ int GameManager::Run()
         m_renderer.Present();
 
         // Synchronisation CPU/GPU (on attend que le GPU ait fini)
-        WaitForPreviousFrame();
+        m_renderer.SynchroGPUCPU();
     }
+
+    Release();
 
     return static_cast<int>(msg.wParam);
 }
 
-// helper pour la synchronisation
-void GameManager::WaitForPreviousFrame()
+void GameManager::Release()
 {
-    m_renderer.SignalAndWait();
+    m_renderer.Release();
 }
+
 
 void GameManager::ProcessMessage()
 {

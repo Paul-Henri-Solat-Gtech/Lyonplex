@@ -19,7 +19,9 @@ public:
 	
 	void ExecuteCommands(); // Envoie la CommandList enregistrée au GPU via la CommandQueue
 	void Present();			// Demande à la swap chain de présenter le back buffer courant à l’écran
-	void SignalAndWait();	// Synchronise le CPU et la GPU en signalant la fence et en attendant sa complétion
+	void SynchroGPUCPU();	// Synchronise le CPU et la GPU en signalant la fence et en attendant sa complétion
+
+	void Release();
 
 private:
 	

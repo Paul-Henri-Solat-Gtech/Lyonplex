@@ -38,7 +38,7 @@ bool RenderingManager::Init()
 
 void RenderingManager::RecordCommands()
 {
-    m_commandManager.ResetCommands();
+    m_commandManager.Begin();
 
     // Barrier pour faire la transition du back buffer de l'etat PRESENT a RENDER_TARGET
     CD3DX12_RESOURCE_BARRIER barrier;
@@ -54,7 +54,7 @@ void RenderingManager::RecordCommands()
 
     SetBarrierToPresent(barrier);   
 
-    m_commandManager.GetCommandList()->Close();
+    m_commandManager.End();
 }
 
 
@@ -77,24 +77,24 @@ void RenderingManager::SetBarrierToPresent(CD3DX12_RESOURCE_BARRIER& barrier)
 
 void RenderingManager::ExecuteCommands()
 {
-    ID3D12CommandList* cmdLists[] = { m_commandManager.GetCommandList().Get() };   
-    m_graphicsDevice.GetCommandQueue()->ExecuteCommandLists(1, cmdLists);
+    m_commandManager.ExecuteCmdLists();
 }
 
 void RenderingManager::Present()
 {
-    m_graphicsDevice.GetSwapChain()->Present(1, 0);
-    m_graphicsDevice.GetFrameIndex() = m_graphicsDevice.GetSwapChain()->GetCurrentBackBufferIndex();
+    m_graphicsDevice.Present();
 }
 
-void RenderingManager::SignalAndWait()
+void RenderingManager::SynchroGPUCPU()
 {
-    m_commandManager.GetFenceValue()++;
-    m_graphicsDevice.GetCommandQueue()->Signal(m_commandManager.GetFence().Get(), m_commandManager.GetFenceValue());
-    if (m_commandManager.GetFence()->GetCompletedValue() < m_commandManager.GetFenceValue()) 
-    {
-        m_commandManager.GetFence()->SetEventOnCompletion(m_commandManager.GetFenceValue(), m_commandManager.GetFenceEvent());
-        WaitForSingleObject(m_commandManager.GetFenceEvent(), INFINITE);
-    }
+    m_commandManager.SignalAndWait();
+}
+
+void RenderingManager::Release()
+{
+    m_graphicsDevice.Release();
+    m_descriptorManager.Release();
+    m_commandManager.Release();
+    m_render3D.Release();
 }
 

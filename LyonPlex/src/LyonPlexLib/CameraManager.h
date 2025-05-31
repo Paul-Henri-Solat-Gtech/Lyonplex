@@ -42,7 +42,13 @@ public:
 	// déplace la caméra le long de son vecteur coté
 	void MoveUp(float distance);
 
+	// Méthodes de rotation
+	void Yaw(float angleRadians);
+	void Pitch(float angleRadians);
+
 	void SetSpeed(float speed) { m_cameraSpeed = speed; };
+
+	XMFLOAT3 GetPosition() const { return m_position; }
 
 private:
 	HWND m_windowWP;
@@ -63,5 +69,9 @@ private:
 
 	bool m_viewNeedsUpdate;
 	float m_cameraSpeed;
+	float m_mouseSensitivity;   // ajustable
+	// Pour gérer la rotation à la souris
+	bool m_rotating;
+	POINT m_prevMousePos;
 };
 

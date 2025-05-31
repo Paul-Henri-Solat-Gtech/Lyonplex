@@ -35,27 +35,34 @@ bool RenderingManager::Init(ECSManager* ECS)
     }
     m_render3D.CreatePipeline();
 
+    // Camera
+    if (!m_cameraManager.Init(m_windowWP, &m_graphicsDevice, &m_commandManager, &m_render3D)) 
+    {
+        return false;
+    }
+    m_cameraManager.CreateCameraBuffer();
+
     return true;
 }
 
 void RenderingManager::RecordCommands()
 {
+    // 1) Démarre l’enregistrement des commandes
     m_commandManager.Begin();
 
-    // Barrier pour faire la transition du back buffer de l'etat PRESENT a RENDER_TARGET
+    // 2) Barrier pour faire la transition du back buffer de l'etat PRESENT a RENDER_TARGET
     CD3DX12_RESOURCE_BARRIER barrier;
-
     SetBarrierToRenderTarget(barrier);
 
-    // Classes Render
-    /**/
+    // 3) Upload constant buffer camera
+    m_cameraManager.UploadConstantBuffer();
 
+    // Classes Render
+    // 4) Dessine la scène 3D (Render3D, PSO, viewports, etc.)
     m_render3D.RecordCommands();
 
-    /**/
-
+    // 5) Transition render target : present -> fin d’enregistrement
     SetBarrierToPresent(barrier);   
-
     m_commandManager.End();
 }
 
@@ -104,3 +111,7 @@ void RenderingManager::Release()
     delete mp_ECS;
 }
 
+void RenderingManager::Update()
+{
+    m_cameraManager.UpdateCamera();
+}

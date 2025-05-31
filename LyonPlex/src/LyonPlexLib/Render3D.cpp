@@ -29,7 +29,6 @@ void Render3D::Resize(int w, int h)
 
 void Render3D::RecordCommands()
 {
-
 	// Définir le viewport et le scissor  (peuvent servir a "fenetrer" de l'affichage, par exemple pour minimap) : PEUT ETRE GENERAL OU VARIABLE
 	// Le viewport représente la zone de la fenêtre dans laquelle on va dessiner
 	D3D12_VIEWPORT viewport = {};
@@ -101,4 +100,7 @@ void Render3D::Release()
 
 	mp_commandManager = nullptr;
 	delete mp_commandManager;
+
+	/*mp_cameraManager = nullptr;
+	delete mp_cameraManager;*/
 }

@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "GraphicsPipeline.h"
 
 void GraphicsPipeline::Init(GraphicsDevice* graphicsDevice, DescriptorManager* descriptorManager, CommandManager* commandManager)
@@ -17,8 +17,14 @@ void GraphicsPipeline::CreatePipeline()
 
 void GraphicsPipeline::CreateRootSignature()
 {
+    // 0) shader with camera
+    CD3DX12_ROOT_PARAMETER rootParams[1];
+    rootParams[0].InitAsConstantBufferView(0); // <- b0 côté shader
+
     // 1) Root signature
     D3D12_ROOT_SIGNATURE_DESC rootSigDesc = {};
+    rootSigDesc.NumParameters = _countof(rootParams);
+    rootSigDesc.pParameters = rootParams;
     rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
     ComPtr<ID3DBlob> signature, error;

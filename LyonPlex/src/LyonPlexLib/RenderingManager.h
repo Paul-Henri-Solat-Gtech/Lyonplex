@@ -8,6 +8,7 @@
 #include "GraphicsDevice.h"
 #include "DescriptorManager.h"
 #include "CommandManager.h"
+#include "CameraManager.h"
 #include "Render3D.h"
 
 class RenderingManager
@@ -28,6 +29,8 @@ public:
 
 	void Release();
 
+	void Update();
+
 private:
 	
 	HWND m_windowWP;		// The created base window (pour le swapchain)
@@ -40,5 +43,6 @@ private:
 	DescriptorManager m_descriptorManager;
 	CommandManager m_commandManager;
 	Render3D m_render3D;
+	CameraManager m_cameraManager;
 };
 

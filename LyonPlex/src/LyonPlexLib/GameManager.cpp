@@ -46,7 +46,7 @@ int GameManager::Run()
             DispatchMessage(&msg); // Appelle la WindowProcedure correspondante
         }
         // UPDATE
-        m_renderer.UpdateTemp();
+        m_renderer.Update();
 
         // Enregistrement et envoi des commandes
         

@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+#include "CommandManager.h"
+#include "Render3D.h"
+#include "GraphicsDevice.h"
+
 struct CameraBuffer
 {
 	XMMATRIX view;
@@ -9,8 +13,13 @@ struct CameraBuffer
 class CameraManager
 {
 public:
-	bool Init();
+	bool Init(HWND windowWP, GraphicsDevice* graphicsDevice, CommandManager* commandManager, Render3D* render3d);
 
+	// CameraBuffer
+	void CreateCameraBuffer();
+	void UploadConstantBuffer();
+
+	// ViewMatrix
 	void UpdateViewMatrix();
 	void UpdateProjectionMatrix(float fovDegrees, float aspectRatio, float nearPlane, float farPlane);
 
@@ -19,7 +28,10 @@ public:
 
 	CameraBuffer GetCameraBuffer() const;
 
-	//Temporaire a remplacer avec un TRANSFORM
+	// Movement
+	void UpdateCamera();
+
+	// Temporaire a remplacer avec un TRANSFORM
 	void SetPosition(const XMFLOAT3& pos);
 	XMFLOAT3 GetPosition() { return m_position; };
 	void SetDirection(const XMFLOAT3& forward);
@@ -30,10 +42,17 @@ public:
 	// déplace la caméra le long de son vecteur coté
 	void MoveUp(float distance);
 
+	void SetSpeed(float speed) { m_cameraSpeed = speed; };
 
 private:
-	//xmfloat provided with dxmath
-	
+	HWND m_windowWP;
+	GraphicsDevice* mp_graphicsDevice;
+	CommandManager* mp_commandManager;
+	Render3D* mp_render3d;
+
+	ComPtr<ID3D12Resource> m_cameraConstantBuffer;
+
+	// xmfloat provided with dxmath
 	// Position et orientation
 	XMFLOAT3 m_position;
 	XMFLOAT3 m_forward, m_up, m_right;
@@ -43,5 +62,6 @@ private:
 	XMFLOAT4X4 m_projectionMatrix{};
 
 	bool m_viewNeedsUpdate;
+	float m_cameraSpeed;
 };
 

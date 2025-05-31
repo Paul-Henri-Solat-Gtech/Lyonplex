@@ -10,8 +10,8 @@ public:
     ResourceManager() = default;
     ~ResourceManager() { Clear(); }
 
-    // Charge une ressource à partir d'une clé (ex: chemin fichier).
-    // Si déjà chargée, renvoie l'ID existant.
+    // Charge une ressource Epartir d'une clE(ex: chemin fichier).
+    // Si déjEchargée, renvoie l'ID existant.
     ResourceID Load(const Key& key) 
     {
         auto it = m_lookup.find(key);
@@ -29,12 +29,12 @@ public:
         return newID;
     }
 
-    // Ajoute manuellement une ressource déjà remplie et renvoie son ID
+    // Ajoute manuellement une ressource déjEremplie et renvoie son ID
     ResourceID Add(const T& data) 
     {
         ResourceID newID = static_cast<ResourceID>(m_resources.size());
         m_resources.push_back(data);
-        m_keys.push_back(""); // clé vide ou personnalisable
+        m_keys.push_back(""); // clEvide ou personnalisable
         return newID;
     }
 
@@ -55,7 +55,7 @@ public:
         return newID;
     }
 
-    // Accès à la ressource par ID
+    // Accès Ela ressource par ID
     const T& Get(ResourceID id) const 
     {
         assert(id < m_resources.size() && "Invalid resource ID");
@@ -67,7 +67,7 @@ public:
         return m_resources[id];
     }
 
-    // Vérifie si une clé est déjà chargée
+    // Vérifie si une clEest déjEchargée
     bool Has(const Key& key) const 
     {
         return m_lookup.find(key) != m_lookup.end();

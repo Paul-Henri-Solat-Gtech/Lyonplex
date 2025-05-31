@@ -48,6 +48,7 @@ private:
 
 	MeshData CreateMesh_Triangle();
 	MeshData CreateMesh_Square();
+	MeshData CreateMesh_Cube();
 
 	HRESULT BuildAndUploadGlobalBuffers();
 

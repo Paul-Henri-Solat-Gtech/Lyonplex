@@ -9,6 +9,7 @@ void MeshManager::Init(GraphicsDevice* graphicsDevice)
 	//InitializeMesh_Cube();
 	InitializeMesh_Triangle();
 	InitializeMesh_Square();
+	InitializeMesh_Cube();
 	// ...
 
 
@@ -55,6 +56,45 @@ MeshData MeshManager::CreateMesh_Square()
 	{
 		0, 2, 1,  // triangle bas-gauche → bas-droit
 		0, 3, 2   // triangle bas-gauche → haut-droit
+	};
+
+	m.vSize = static_cast<uint32_t>(m.vertices.size());
+	m.iSize = static_cast<uint32_t>(m.indices.size());
+	return m;
+}
+MeshData MeshManager::CreateMesh_Cube()
+{
+	MeshData m;
+	m.vertices =
+	{
+		// Face avant
+		{{ -0.25f,  0.25f, -0.25f },{1,0,0,1}}, // 0
+		{{ -0.25f, -0.25f, -0.25f },{0,1,0,1}}, // 1
+		{{  0.25f, -0.25f, -0.25f },{0,0,1,1}}, // 2
+		{{  0.25f,  0.25f, -0.25f },{1,1,0,1}}, // 3
+
+		// Face arrière
+		{{ -0.25f,  0.25f,  0.25f },{1,0,1,1}}, // 4
+		{{ -0.25f, -0.25f,  0.25f },{0,1,1,1}}, // 5
+		{{  0.25f, -0.25f,  0.25f },{1,1,1,1}}, // 6
+		{{  0.25f,  0.25f,  0.25f },{0,0,0,1}}, // 7
+	};
+
+	// Definition des indices pour dessiner 2 triangles
+	m.indices =
+	{
+		// Face avant
+		0, 1, 2,  0, 2, 3,
+		// Face arrière
+		4, 6, 5,  4, 7, 6,
+		// Face gauche
+		4, 5, 1,  4, 1, 0,
+		// Face droite
+		3, 2, 6,  3, 6, 7,
+		// Face haut
+		4, 0, 3,  4, 3, 7,
+		// Face bas
+		1, 5, 6,  1, 6, 2
 	};
 
 	m.vSize = static_cast<uint32_t>(m.vertices.size());
@@ -153,6 +193,9 @@ void MeshManager::InitializeMesh_Square()
 
 void MeshManager::InitializeMesh_Cube()
 {
+	MeshData cube = CreateMesh_Cube();
+	auto cubeID = m_meshLibrary.Add(cube);
+
 	//Mesh* newMesh = new Mesh;
 
 	//VertexParam cube[] =

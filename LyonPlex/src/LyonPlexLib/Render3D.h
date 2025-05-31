@@ -7,7 +7,7 @@
 class Render3D : public IRender
 {
 public:
-	bool Init(HWND windowHandle, GraphicsDevice* graphicsDevice, DescriptorManager* descriptorManager, CommandManager* commandManager) override;
+	bool Init(HWND windowHandle, ECSManager* ECS, GraphicsDevice* graphicsDevice, DescriptorManager* descriptorManager, CommandManager* commandManager) override;
 	void Resize(int w, int h) override;
 	void RecordCommands() override;
 	void CreatePipeline() override; // Managing chain for 3D elements (data not draw)
@@ -25,5 +25,8 @@ private:
 
 	GraphicsPipeline m_graphicsPipeline;
 	MeshManager m_meshManager;
+
+	//ECS Manager
+	ECSManager* m_ECS;
 };
 

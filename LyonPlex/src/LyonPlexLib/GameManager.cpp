@@ -20,7 +20,7 @@ bool GameManager::Init()
     // 2) Configurer le renderer avec le handle de la fenetre
     HWND hwnd = m_window.GetWindowHandle();
     m_renderer.SetWindowHandle(hwnd);
-    m_renderer.Init(); // A VOIR MODIFIER ET METTRE HWND COMME ARGUMENT EN POINTEUR (et mettre le init en bool)
+    m_renderer.Init(&m_ECS); // A VOIR MODIFIER ET METTRE HWND COMME ARGUMENT EN POINTEUR (et mettre le init en bool)
 
     m_isRunning = true;
     return true;

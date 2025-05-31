@@ -3,16 +3,6 @@
 #include "EntityManager.h"
 #include "ComponentManager.h"
 
-//class ECSManager
-//{
-//public:
-//
-//private:
-//
-//
-//};
-
-
 
 //-----------------------------------------------------------------------------//
 // ECSManager: orchestration
@@ -24,17 +14,8 @@ public:
 
     Entity CreateEntity() { return m_entityMgr.Create(); }
 
-    /*void DestroyEntity(Entity entity) 
-    {
-        m_componentMgr.RemoveAllComponents(entity);
-        m_entityMgr.Destroy(entity);
-    }*/
-
     // Queue destruction to avoid modifying during iteration
-    void DestroyEntity(Entity e) {
-        assert(m_entityMgr.Exists(e) && "Entity must exist to destroy");
-        m_destroyQueue.push_back(e);
-    }
+    void DestroyEntity(Entity e);
 
     // Add/remove m_components
     template<typename T>
@@ -50,18 +31,23 @@ public:
         m_componentMgr.RemoveComponent<T>(entity);
     }
 
-    ComponentMask GetComponentMask(Entity entity) const
+    template<typename T>
+    T* GetComponent(Entity e) const 
     {
-        return m_componentMgr.GetMask(entity);
+        return m_componentMgr.GetComponent<T>(e);
     }
+
+    ComponentMask GetComponentMask(Entity entity) const { return m_componentMgr.GetMask(entity); }
 
     // Example of a system: call func for each entity matching mask
     template<typename Func>
     void ForEach(ComponentMask mask, Func func) 
     {
-        for (auto id : m_entityMgr.GetAll()) {
+        for (auto id : m_entityMgr.GetAll()) 
+        {
             Entity entity{ id };
-            if ((m_componentMgr.GetMask(entity) & mask) == mask) {
+            if ((m_componentMgr.GetMask(entity) & mask) == mask) 
+            {
                 func(entity);
             }
         }
@@ -71,7 +57,8 @@ public:
     // Process all queued destructions at end of frame
     void EndFrame() 
     {
-        for (Entity e : m_destroyQueue) {
+        for (Entity e : m_destroyQueue) 
+        {
             m_componentMgr.RemoveAllComponents(e);
             m_entityMgr.Destroy(e);
         }

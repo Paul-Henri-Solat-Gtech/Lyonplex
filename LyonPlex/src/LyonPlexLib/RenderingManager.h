@@ -1,5 +1,10 @@
 ﻿#pragma once
 
+// Hierarchie supérieure ou egale
+//#include "ECSManager.h"
+//class ECSManager;
+
+// Hierarchie inférieure
 #include "GraphicsDevice.h"
 #include "DescriptorManager.h"
 #include "CommandManager.h"
@@ -8,7 +13,7 @@
 class RenderingManager
 {
 public:
-	bool Init();
+	bool Init(ECSManager* ECS);
 	
 	void SetWindowHandle(HWND windowHandle) { m_windowWP = windowHandle; }
 
@@ -26,6 +31,9 @@ public:
 private:
 	
 	HWND m_windowWP;		// The created base window (pour le swapchain)
+
+	//ECS Manager
+	ECSManager* mp_ECS;
 
 	// Instance de class de directX
 	GraphicsDevice m_graphicsDevice;

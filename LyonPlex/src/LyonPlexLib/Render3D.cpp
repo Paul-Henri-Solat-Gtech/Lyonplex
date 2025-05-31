@@ -1,8 +1,10 @@
 ﻿#include "pch.h"
 #include "Render3D.h"
 
-bool Render3D::Init(HWND windowHandle, GraphicsDevice* graphicsDevice, DescriptorManager* descriptorManager, CommandManager* commandManager)
+bool Render3D::Init(HWND windowHandle, ECSManager* ECS, GraphicsDevice* graphicsDevice, DescriptorManager* descriptorManager, CommandManager* commandManager)
 {
+	m_ECS = ECS;
+
 	mp_graphicsDevice = graphicsDevice;
 	mp_descriptorManager = descriptorManager;
 	mp_commandManager = commandManager;
@@ -10,6 +12,12 @@ bool Render3D::Init(HWND windowHandle, GraphicsDevice* graphicsDevice, Descripto
 
 	m_graphicsPipeline.Init(mp_graphicsDevice, mp_descriptorManager, mp_commandManager);
 	m_meshManager.Init(mp_graphicsDevice);
+
+	Entity eTriangle = m_ECS->CreateEntity();
+	m_ECS->AddComponent<MeshComponent>(eTriangle, new MeshComponent(1, 0));
+	
+	Entity eSquare = m_ECS->CreateEntity();
+	m_ECS->AddComponent<MeshComponent>(eSquare, new MeshComponent(0, 0));
 
 	return true;
 }
@@ -59,21 +67,23 @@ void Render3D::RecordCommands()
 	mp_commandManager->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_meshManager.GetGlobalVBView());
 	mp_commandManager->GetCommandList()->IASetIndexBuffer(&m_meshManager.GetGlobalIBView());
-	
-	// Ligne à répéter dans une boucle d'itération sur les entités
-	//mp_commandManager->GetCommandList()->DrawIndexedInstanced(3, 1, 0, 0, 0); // Arguments à changer : vSize   // InstanceCount   // iOffset   // vOffset    // StartInstanceLocation (0)
 
-	for (auto& mesh : m_meshManager.GetMeshList())
-	{
+	ComponentMask renderMask = 1ULL << MeshComponent::StaticTypeID;
+
+	m_ECS->ForEach(renderMask, [&](Entity ent)
+		{
+		MeshComponent* m = m_ECS->GetComponent< MeshComponent>(ent);
+		const MeshData& data = m_meshManager.GetMeshLib().Get(m->meshID);
+		//const Material& mat = materialLib.Get(m->materialID);
+		//renderer.Draw(data, mat);
 		mp_commandManager->GetCommandList()->DrawIndexedInstanced(
-			mesh->m_iSize,      // nombre d’indices
+			data.iSize,      // nombre d’indices
 			1,
-			mesh->m_iOffset,    // offset dans le buffer d’indices
-			mesh->m_vOffset,    // BaseVertexLocation = 0 !
-			//0,
+			data.iOffset,    // offset dans le buffer d’indices
+			0,    // BaseVertexLocation = 0 ! ?
 			0
 		);
-	}
+		});
 }
 
 void Render3D::CreatePipeline()

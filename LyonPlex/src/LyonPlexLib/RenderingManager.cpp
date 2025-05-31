@@ -1,8 +1,10 @@
 ﻿#include "pch.h"
 #include "RenderingManager.h"
 
-bool RenderingManager::Init()
+bool RenderingManager::Init(ECSManager* ECS)
 {
+    mp_ECS = ECS;
+
     // Graphics Device
     if (!m_graphicsDevice.Init(m_windowWP)) 
     {
@@ -27,7 +29,7 @@ bool RenderingManager::Init()
     m_commandManager.CreateCommandManager();
 
     // Render 3D
-    if (!m_render3D.Init(m_windowWP, &m_graphicsDevice, &m_descriptorManager, &m_commandManager)) 
+    if (!m_render3D.Init(m_windowWP, ECS, &m_graphicsDevice, &m_descriptorManager, &m_commandManager))
     {
         return false;
     }
@@ -92,9 +94,13 @@ void RenderingManager::SynchroGPUCPU()
 
 void RenderingManager::Release()
 {
+    mp_ECS = nullptr;
+
     m_graphicsDevice.Release();
     m_descriptorManager.Release();
     m_commandManager.Release();
     m_render3D.Release();
+
+    delete mp_ECS;
 }
 

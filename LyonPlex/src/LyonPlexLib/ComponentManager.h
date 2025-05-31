@@ -1,55 +1,15 @@
 #pragma once
 
-//struct EntityComponents
-//{
-//	uint32_t tab_index = 0;
-//	ComponentMask mask = 0;
-//	std::vector<Component*> vec_m_components;
-//
-//	~EntityComponents()
-//	{
-//		for (auto* comp : vec_m_components)
-//		{
-//			delete comp;
-//		}
-//		vec_m_components.clear();
-//	}
-//};
-//
-//class ComponentManager
-//{
-//public:
-//
-//	EntityComponents* (&GetComponentsTab())[64000] { return tab_Components; }
-//
-//	std::vector<EntityComponents*>& GetComponentsToAddTab() { return tab_compToAdd; }
-//
-//private:
-//	~ComponentManager();
-//
-//	EntityComponents* tab_Components[64000] = { nullptr };
-//	std::vector<EntityComponents*> tab_compToAdd;
-//};
-
 #include "EntityManager.h"
 
 using ComponentMask = uint64_t; // assume up to 64 component types
-
-
-//-----------------------------------------------------------------------------//
-// Entity definition
-//-----------------------------------------------------------------------------//
-
-//-----------------------------------------------------------------------------//
-// Component storage
-//-----------------------------------------------------------------------------//
-
 
 struct Component {
     virtual ~Component() = default;
     ComponentMask mask;
     uint32_t typeID;
 };
+
 
 class ComponentManager 
 {
@@ -78,23 +38,23 @@ public:
             }
         }
     }
+    template<typename T>
+    T* GetComponent(Entity entity) const 
+    {
+        auto it = m_components.find(entity.id);
+        if (it == m_components.end()) return nullptr;
+        for (auto* comp : it->second.data) {
+            if (comp->typeID == T::StaticTypeID)
+                return static_cast<T*>(comp);
+        }
+        return nullptr;
+    }
+
+    const std::vector<Component*>& GetComponents(Entity entity) const;
+
+    ComponentMask GetMask(Entity entity) const;
 
     void RemoveAllComponents(Entity entity);
-
-    ComponentMask GetMask(Entity entity) const
-    {
-        auto it = m_components.find(entity.id);
-        if (it == m_components.end()) return 0;
-        return it->second.mask;
-    }
-
-    const std::vector<Component*>& GetComponents(Entity entity) const
-    {
-        static const std::vector<Component*> empty;
-        auto it = m_components.find(entity.id);
-        if (it == m_components.end()) return empty;
-        return it->second.data;
-    }
 
 private:
     struct Storage 
@@ -113,3 +73,18 @@ private:
 };
 
 
+// A DEPLACER
+struct MeshComponent : public Component
+{
+    static constexpr uint32_t StaticTypeID = 0;
+    uint32_t meshID;
+    uint32_t materialID;
+
+    MeshComponent(uint32_t meshID_, uint32_t materialID_) 
+    {
+        mask = 1ULL << StaticTypeID;
+        typeID = StaticTypeID;
+        meshID = meshID_;
+        materialID = materialID_;
+    }
+};

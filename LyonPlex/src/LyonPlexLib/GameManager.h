@@ -2,6 +2,7 @@
 
 #include "WindowPlex.h"
 #include "RenderingManager.h"
+#include "ECSManager.h"
 
 class GameManager 
 {
@@ -22,7 +23,9 @@ private:
 
     HINSTANCE m_hInstance;
     WindowPlex m_window;
+    ECSManager m_ECS;
     RenderingManager m_renderer;
     bool m_isRunning = false;
+
 };
 

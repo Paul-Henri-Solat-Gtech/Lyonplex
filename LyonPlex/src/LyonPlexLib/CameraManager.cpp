@@ -95,12 +95,12 @@ void CameraManager::UpdateCamera()
     // Need a real input system
         // ----------- Gestion clavier -----------
     float deltaTime = 1.0f / 60.0f; // À remplacer par un vrai deltaTime si possible
-    if (GetAsyncKeyState('Z') & 0x8000) MoveForward(m_cameraSpeed * deltaTime);
-    if (GetAsyncKeyState('S') & 0x8000) MoveForward(-m_cameraSpeed * deltaTime);
-    if (GetAsyncKeyState('D') & 0x8000) MoveRight(m_cameraSpeed * deltaTime);
-    if (GetAsyncKeyState('Q') & 0x8000) MoveRight(-m_cameraSpeed * deltaTime);
-    if (GetAsyncKeyState(VK_SPACE) & 0x8000) MoveUp(m_cameraSpeed * deltaTime);
-    if (GetAsyncKeyState(VK_CONTROL) & 0x8000) MoveUp(-m_cameraSpeed * deltaTime);
+    if (InputManager::GetKeyIsPressed('Z')) MoveForward(m_cameraSpeed * deltaTime);
+    if (InputManager::GetKeyIsPressed('S')) MoveForward(-m_cameraSpeed * deltaTime);
+    if (InputManager::GetKeyIsPressed('D')) MoveRight(m_cameraSpeed * deltaTime);
+    if (InputManager::GetKeyIsPressed('Q')) MoveRight(-m_cameraSpeed * deltaTime);
+    if (InputManager::GetKeyIsPressed(VK_SPACE)) MoveUp(m_cameraSpeed * deltaTime);
+    if (InputManager::GetKeyIsPressed(VK_CONTROL)) MoveUp(-m_cameraSpeed * deltaTime);
 
     // ----------- Gestion souris (clic droit + déplacement) -----------
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)

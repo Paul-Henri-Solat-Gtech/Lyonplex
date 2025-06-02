@@ -23,6 +23,11 @@ bool GameManager::Init()
     m_renderer.Init(&m_ECS); // A VOIR MODIFIER ET METTRE HWND COMME ARGUMENT EN POINTEUR (et mettre le init en bool)
 
     m_isRunning = true;
+
+    // 3) Init scene & start scene (need to set a scene first)
+    m_sceneManager.Init();
+    m_sceneManager.StartScene();
+
     return true;
 }
 
@@ -47,6 +52,7 @@ int GameManager::Run()
         }
         // UPDATE
         m_renderer.Update();
+        m_sceneManager.UpdateScene();
 
         // Enregistrement et envoi des commandes
         
@@ -71,6 +77,7 @@ int GameManager::Run()
 void GameManager::Release()
 {
     m_renderer.Release();
+    m_sceneManager.ReleaseScene();
 }
 
 

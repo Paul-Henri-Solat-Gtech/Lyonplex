@@ -32,10 +32,10 @@ private:
 	GraphicsDevice* mp_graphicsDevice;
 	DescriptorManager* mp_descriptorManager;
 
-	ComPtr<ID3D12CommandAllocator> m_commandAllocator;  // Alloue de la mémoire pour les commandes GPU
-	ComPtr<ID3D12GraphicsCommandList> m_commandList;	// Liste contenant les commandes graphiques à exécuter
+	ComPtr<ID3D12CommandAllocator> m_commandAllocator;  // Alloue de la memoire pour les commandes GPU
+	ComPtr<ID3D12GraphicsCommandList> m_commandList;	// Liste contenant les commandes graphiques a executer
 	ComPtr<ID3D12Fence> m_fence;						// Synchronisation CPU <-> GPU
-	HANDLE m_fenceEvent;								// Événement Win32 pour attendre que la fence atteigne une valeur
+	HANDLE m_fenceEvent;								// Évenement Win32 pour attendre que la fence atteigne une valeur
 	UINT64 m_fenceValue = 0;							// Valeur actuelle de synchronisation de la fence
 };
 

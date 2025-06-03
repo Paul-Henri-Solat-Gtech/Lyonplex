@@ -18,17 +18,38 @@ void GraphicsPipeline::CreatePipeline()
 void GraphicsPipeline::CreateRootSignature()
 {
     // 0) shader with camera
-    CD3DX12_ROOT_PARAMETER rootParams[1];
-    rootParams[0].InitAsConstantBufferView(0); // <- b0 côté shader
+    // 1) Definition des deux root parameters (slot b0 et b1)
+    CD3DX12_ROOT_PARAMETER rootParams[2];
+    rootParams[0].InitAsConstantBufferView(0); // <- b0 côte shader pour camera (view & proj)
+    rootParams[1].InitAsConstantBufferView(1); // <- b1 côte shader pour transform (world)
 
-    // 1) Root signature
+    // 2) Construire la root signature
     D3D12_ROOT_SIGNATURE_DESC rootSigDesc = {};
     rootSigDesc.NumParameters = _countof(rootParams);
     rootSigDesc.pParameters = rootParams;
     rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
+    // 3) Serialiser et creer
     ComPtr<ID3DBlob> signature, error;
-    D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
+    HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
+    if (FAILED(hr))
+    {
+        // Si errorBlob n’est pas null, on peut afficher son contenu (c'est un ID3DBlob)
+        if (error)
+        {
+            // Le message d’erreur est au format ASCII (car D3DCompile et D3D12Serialize renvoient des blobs d’erreur ASCII)
+            const char* msg = reinterpret_cast<const char*>(error->GetBufferPointer());
+            OutputDebugStringA("D3D12SerializeRootSignature failed:\n");
+            OutputDebugStringA(msg);
+            OutputDebugStringA("\n");
+        }
+        else
+        {
+            OutputDebugStringA("D3D12SerializeRootSignature failed: aucun error blob retourne.\n");
+        }
+        // Ici, vous pouvez choisir de retourner ou de planter proprement
+        return;
+    }
     mp_graphicsDevice->GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature));
 }
 
@@ -37,7 +58,7 @@ void GraphicsPipeline::CompileShader()
     // 2) Compilation des shaders
 
     //VERTEX SHADER
-    HRESULT hr = D3DCompileFromFile(L"../../../src/LyonPlexLib/LyonShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &m_vsBlob, &m_errorBlob);
+    HRESULT hr = D3DCompileFromFile(L"../../../src/LyonPlexLib/VertexShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &m_vsBlob, &m_errorBlob);
 
     if (FAILED(hr)) {
         if (m_errorBlob) {
@@ -49,7 +70,7 @@ void GraphicsPipeline::CompileShader()
     }
 
     //PIXEL SHADER
-    hr = D3DCompileFromFile(L"../../../src/LyonPlexLib/LyonShader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &m_psBlob, &m_errorBlob);
+    hr = D3DCompileFromFile(L"../../../src/LyonPlexLib/VertexShader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &m_psBlob, &m_errorBlob);
 
     if (FAILED(hr)) {
         if (m_errorBlob) OutputDebugStringA((char*)m_errorBlob->GetBufferPointer());

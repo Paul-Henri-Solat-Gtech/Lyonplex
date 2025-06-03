@@ -15,7 +15,11 @@ void MeshManager::Init(GraphicsDevice* graphicsDevice)
 
 	// Build & upload meshs
 	BuildAndUploadGlobalBuffers();
+
+	//InitConstantBuffer();
+
 }
+
 
 MeshData MeshManager::CreateMesh_Triangle()
 {
@@ -73,7 +77,7 @@ MeshData MeshManager::CreateMesh_Cube()
 		{{  0.25f, -0.25f, -0.25f },{0,0,1,1}}, // 2
 		{{  0.25f,  0.25f, -0.25f },{1,1,0,1}}, // 3
 
-		// Face arrière
+		// Face arriere
 		{{ -0.25f,  0.25f,  0.25f },{1,0,1,1}}, // 4
 		{{ -0.25f, -0.25f,  0.25f },{0,1,1,1}}, // 5
 		{{  0.25f, -0.25f,  0.25f },{1,1,1,1}}, // 6
@@ -85,7 +89,7 @@ MeshData MeshManager::CreateMesh_Cube()
 	{
 		// Face avant
 		0, 1, 2,  0, 2, 3,
-		// Face arrière
+		// Face arriere
 		4, 6, 5,  4, 7, 6,
 		// Face gauche
 		4, 5, 1,  4, 1, 0,
@@ -109,7 +113,7 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 	size_t vertexCursor = 0;
 	size_t indexCursor = 0;
 
-	// Parcours chaque MeshData enregistré (du plus petit ID au plus grand)
+	// Parcours chaque MeshData enregistre (du plus petit ID au plus grand)
 	for (uint32_t id = 0; id < m_meshLibrary.Count(); ++id) 
 	{
 		MeshData& md = m_meshLibrary.Get(id);
@@ -120,10 +124,10 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 		md.iOffset = static_cast<uint32_t>(indexCursor);
 		md.iSize = static_cast<uint32_t>(md.indices.size());
 
-		// 2) Ajouter les sommets de ce maillage à la suite
+		// 2) Ajouter les sommets de ce maillage a la suite
 		globalVerts.insert(globalVerts.end(), md.vertices.begin(), md.vertices.end());
 
-		// 3) Ajouter les indices, corrigés par le décalage vOffset
+		// 3) Ajouter les indices, corriges par le decalage vOffset
 		for (auto idx : md.indices) 
 		{
 			globalIdxs.push_back(static_cast<uint16_t>(idx + md.vOffset));
@@ -206,7 +210,7 @@ void MeshManager::InitializeMesh_Cube()
 	//	{{  0.25f, -0.25f, -0.25f },{0,0,1,1}}, // 2
 	//	{{  0.25f,  0.25f, -0.25f },{1,1,0,1}}, // 3
 
-	//	// Face arrière
+	//	// Face arriere
 	//	{{ -0.25f,  0.25f,  0.25f },{1,0,1,1}}, // 4
 	//	{{ -0.25f, -0.25f,  0.25f },{0,1,1,1}}, // 5
 	//	{{  0.25f, -0.25f,  0.25f },{1,1,1,1}}, // 6
@@ -218,7 +222,7 @@ void MeshManager::InitializeMesh_Cube()
 	//{
 	//	// Face avant
 	//	0, 1, 2,  0, 2, 3,
-	//	// Face arrière
+	//	// Face arriere
 	//	4, 6, 5,  4, 7, 6,
 	//	// Face gauche
 	//	4, 5, 1,  4, 1, 0,

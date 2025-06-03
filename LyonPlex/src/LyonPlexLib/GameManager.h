@@ -23,8 +23,8 @@ private:
 
     HINSTANCE m_hInstance;
     WindowPlex m_window;
-    ECSManager m_ECS;
     RenderingManager m_renderer;
+    ECSManager m_ECS;
     bool m_isRunning = false;
 
 };

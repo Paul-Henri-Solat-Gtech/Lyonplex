@@ -19,7 +19,7 @@ void GraphicsDevice::CreateGraphicsDevice()
 
 void GraphicsDevice::CreateDevice()
 {
-    // Créer le device
+    // Creer le device
     //ComPtr<IDXGIFactory6> factory;
     CreateDXGIFactory1(IID_PPV_ARGS(&m_factory));
 
@@ -30,18 +30,18 @@ void GraphicsDevice::CreateDevice()
 
 void GraphicsDevice::CreateCommandQueue()
 {
-    // Créer la Command queue
+    // Creer la Command queue
     D3D12_COMMAND_QUEUE_DESC cqDesc = {};
     m_device->CreateCommandQueue(&cqDesc, IID_PPV_ARGS(&m_commandQueue));
 }
 
 void GraphicsDevice::CreateSwapChain()
 {
-    // Créer le Swap chain
+    // Creer le Swap chain
     DXGI_SWAP_CHAIN_DESC1 scDesc = {};
     scDesc.BufferCount = FRAMECOUNT;
     scDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    scDesc.Width = 800;  // ou la taille de ta fenêtre
+    scDesc.Width = 800;  // ou la taille de ta fenetre
     scDesc.Height = 600;
     scDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     scDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;

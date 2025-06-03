@@ -2,6 +2,7 @@
 
 #include "EntityManager.h"
 #include "ComponentManager.h"
+#include "SystemManager.h"
 
 
 //-----------------------------------------------------------------------------//
@@ -10,7 +11,9 @@
 class ECSManager 
 {
 public:
-    ECSManager(size_t maxEntities = 1024) : m_entityMgr(maxEntities) {}
+    ECSManager(size_t maxEntities = 1024) : m_entityMgr(maxEntities)  { }
+
+    void Init(GraphicsDevice* device, CommandManager* cmdMgr, Render3D* r3d);
 
     Entity CreateEntity() { return m_entityMgr.Create(); }
 
@@ -65,6 +68,7 @@ public:
         m_destroyQueue.clear();
     }
 
+    SystemManager m_systemMgr;
 private:
     EntityManager m_entityMgr;
     ComponentManager m_componentMgr;

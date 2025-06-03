@@ -1,14 +1,7 @@
 #pragma once
 
 #include "EntityManager.h"
-
-using ComponentMask = uint64_t; // assume up to 64 component types
-
-struct Component {
-    virtual ~Component() = default;
-    ComponentMask mask;
-    uint32_t typeID;
-};
+#include "Components.h"
 
 
 class ComponentManager 
@@ -70,21 +63,4 @@ private:
         }
     };
     std::unordered_map<uint32_t, Storage> m_components;
-};
-
-
-// A DEPLACER
-struct MeshComponent : public Component
-{
-    static constexpr uint32_t StaticTypeID = 0;
-    uint32_t meshID;
-    uint32_t materialID;
-
-    MeshComponent(uint32_t meshID_, uint32_t materialID_) 
-    {
-        mask = 1ULL << StaticTypeID;
-        typeID = StaticTypeID;
-        meshID = meshID_;
-        materialID = materialID_;
-    }
 };

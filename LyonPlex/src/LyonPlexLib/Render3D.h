@@ -4,10 +4,23 @@
 #include "GraphicsPipeline.h"
 #include "MeshManager.h"
 
+inline UINT Align256(UINT size) { return (size + 255) & ~255; }
+
+struct ConstantBuffData
+{
+	DirectX::XMFLOAT4X4 World;		// Pos objet
+	//DirectX::XMFLOAT4X4 ViewProj;	// Projection par rapport a la camera ? (mieux de ne pas combiner cote CPU (en code) pour laisser faire dans le shader (GPU?))
+};
+
 class Render3D : public IRender
 {
 public:
 	bool Init(HWND windowHandle, ECSManager* ECS, GraphicsDevice* graphicsDevice, DescriptorManager* descriptorManager, CommandManager* commandManager) override;
+	
+	bool InitConstantBuffer();
+
+	void UpdateAndBindConstantBuffer(Entity ent/*, XMMATRIX viewMatrix, XMMATRIX projMatrix*/);
+	
 	void Resize(int w, int h) override;
 	void RecordCommands() override;
 	void CreatePipeline() override; // Managing chain for 3D elements (data not draw)
@@ -17,16 +30,27 @@ public:
 	void Release();
 
 private:
-	HWND m_windowWP;
+	HWND				m_windowWP;
 
-	GraphicsDevice* mp_graphicsDevice;
-	DescriptorManager* mp_descriptorManager;
-	CommandManager* mp_commandManager;
+	GraphicsDevice*		mp_graphicsDevice;
+	DescriptorManager*	mp_descriptorManager;
+	CommandManager*		mp_commandManager;
 
-	GraphicsPipeline m_graphicsPipeline;
-	MeshManager m_meshManager;
+	GraphicsPipeline	m_graphicsPipeline;
+	MeshManager			m_meshManager;
 
 	//ECS Manager
-	ECSManager* m_ECS;
+	ECSManager*			m_ECS;
+
+	// Data linked to cBuffer VertexParam
+	ComPtr<ID3D12Resource>	m_cbTransformUpload = nullptr;
+	void*					m_mappedCBData = nullptr;
+	UINT					m_cbSize = 0; // taille alignee a 256
+
+	// TEST
+	UINT entityCount = 1000;
+	UINT frameCount = 2;
+	UINT cbSize = Align256(sizeof(ConstantBuffData));
+	UINT totalSize = cbSize * entityCount * frameCount;
 };
 

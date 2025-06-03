@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "GameManager.h"
 
+#include "SampleScene.h"
+
 GameManager::GameManager(HINSTANCE hInstance) : m_hInstance(hInstance)
 {
 
@@ -24,8 +26,15 @@ bool GameManager::Init()
 
     m_isRunning = true;
 
-    // 3) Init scene & start scene (need to set a scene first)
-    m_sceneManager.Init();
+    // 3) Init scene
+    m_sceneManager.Init(&m_ECS);
+    SampleScene* newSampleScene = new SampleScene();
+    m_sceneManager.CreateScene(newSampleScene, "SampleScene");
+    
+    // 4) Set Scene
+    m_sceneManager.SetScene("SampleScene");
+
+    // 5) Start scene (can be put in set scene)
     m_sceneManager.StartScene();
 
     return true;

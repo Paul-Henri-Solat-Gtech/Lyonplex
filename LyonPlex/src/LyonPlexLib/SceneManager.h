@@ -2,25 +2,35 @@
 
 #include "Scene.h"
 
+struct CreatedScene 
+{
+	std::string sceneName;
+	Scene* scene;
+};
+
 class SceneManager
 {
 public:
-	void Init();
+	void Init(ECSManager* ecsManager);
 
 	void StartScene();
 	void UpdateScene();
 	void ReleaseScene();
 
-	void SetScene(Scene newScene) { m_scene = newScene; };
+	void CreateScene(Scene* scene, std::string sceneName);
+
+	void SetScene(std::string sceneName);
 	
-	Scene GetScene() { return m_scene; };
+	//& GetScene() { return *m_scene; };
 
 private:
+	// Ressources
+	ECSManager* mp_ecsManager;
 
 	// Scene active
-	Scene m_scene;
+	CreatedScene m_scene;
 	
 	// Scene list
-	std::vector<Scene*> m_scenes;
+	std::vector<CreatedScene> m_scenes;
 };
 

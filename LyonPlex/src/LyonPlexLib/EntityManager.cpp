@@ -43,6 +43,13 @@ void EntityManager::Destroy(Entity entity)
     m_freeList.push_back(id);
 }
 
+void EntityManager::ClearAllEntities()
+{
+    m_dense.clear();
+    m_sparse.clear();
+    m_freeList.clear();
+}
+
 bool EntityManager::Exists(Entity entity) const
 {
     return entity.id < m_sparse.size() && m_sparse[entity.id] != UINT32_MAX;

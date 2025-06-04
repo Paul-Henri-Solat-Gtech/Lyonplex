@@ -20,6 +20,8 @@ public:
     // Queue destruction to avoid modifying during iteration
     void DestroyEntity(Entity e);
 
+    void ClearAllEntities() { m_entityMgr.ClearAllEntities(); }
+
     int GetEntityCount() { return m_entityMgr.GetEntityCount(); }
 
     // Add/remove m_components

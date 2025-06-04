@@ -20,6 +20,8 @@ public:
 
     void Destroy(Entity e);
 
+    void ClearAllEntities();
+
     bool Exists(Entity e) const;
 
     const std::vector<uint32_t>& GetAll() const { return m_dense; }

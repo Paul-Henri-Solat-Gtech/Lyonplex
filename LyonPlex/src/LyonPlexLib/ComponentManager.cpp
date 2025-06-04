@@ -13,6 +13,15 @@ ComponentMask ComponentManager::GetMask(Entity entity) const
     return it->second.mask;
 }
 
+void ComponentManager::ClearAllEntityComponents()
+{
+    for (auto& storage : m_components)
+    {
+        storage.second.Clear();
+    }
+    //m_components.clear();     // ==> PAS necessaire puisque EntityManager réutilise les ID des entités supprimées, donc ne pas clear() le tableau fait gagner du temps de non-réallocation des cases mémoire
+}
+
 const std::vector<Component*>& ComponentManager::GetComponents(Entity entity) const
 {
     static const std::vector<Component*> empty;

@@ -11,3 +11,19 @@ void ECSManager::DestroyEntity(Entity e)
     assert(m_entityMgr.Exists(e) && "Entity must exist to destroy");
     m_destroyQueue.push_back(e);
 }
+
+void ECSManager::ClearAllEntities()
+{
+    m_entityMgr.ClearAllEntities();
+    m_componentMgr.ClearAllEntityComponents();
+}
+
+void ECSManager::EndFrame()
+{
+    for (Entity e : m_destroyQueue)
+    {
+        m_componentMgr.RemoveAllComponents(e);
+        m_entityMgr.Destroy(e);
+    }
+    m_destroyQueue.clear();
+}

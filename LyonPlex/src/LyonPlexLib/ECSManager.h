@@ -20,7 +20,7 @@ public:
     // Queue destruction to avoid modifying during iteration
     void DestroyEntity(Entity e);
 
-    void ClearAllEntities() { m_entityMgr.ClearAllEntities(); }
+    void ClearAllEntities();
 
     int GetEntityCount() { return m_entityMgr.GetEntityCount(); }
 
@@ -62,15 +62,7 @@ public:
 
 
     // Process all queued destructions at end of frame
-    void EndFrame() 
-    {
-        for (Entity e : m_destroyQueue) 
-        {
-            m_componentMgr.RemoveAllComponents(e);
-            m_entityMgr.Destroy(e);
-        }
-        m_destroyQueue.clear();
-    }
+    void EndFrame();
 
     SystemManager m_systemMgr;
 private:

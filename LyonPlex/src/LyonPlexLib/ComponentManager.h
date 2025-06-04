@@ -43,11 +43,15 @@ public:
         return nullptr;
     }
 
+    void ClearAllEntityComponents(); 
+
     const std::vector<Component*>& GetComponents(Entity entity) const;
 
     ComponentMask GetMask(Entity entity) const;
 
     void RemoveAllComponents(Entity entity);
+
+    void DestroyEntity(Entity entity);
 
 private:
     struct Storage 

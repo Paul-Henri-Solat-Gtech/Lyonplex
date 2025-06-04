@@ -26,5 +26,25 @@ void Scene::Update()
 
 void Scene::Release()
 {
+	m_sceneEntities.clear();
+}
 
+void Scene::AddEntityToScene(Entity entity, const std::string& entityName)
+{
+	SceneEntity newEntity;
+	newEntity.entity = entity;
+	newEntity.name = entityName;
+
+	m_sceneEntities.push_back(newEntity);
+}
+
+Entity* Scene::GetEntity(const std::string& entityName)
+{
+	for (auto& entity : m_sceneEntities)
+	{
+		if (entity.name == entityName) 
+		{
+			return &entity.entity;
+		}
+	}
 }

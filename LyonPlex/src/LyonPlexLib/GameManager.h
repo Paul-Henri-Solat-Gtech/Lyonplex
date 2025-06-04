@@ -4,6 +4,8 @@
 #include "RenderingManager.h"
 #include "ECSManager.h"
 
+#include "SceneManager.h"
+
 class GameManager 
 {
 public:
@@ -27,5 +29,7 @@ private:
     ECSManager m_ECS;
     bool m_isRunning = false;
 
+    //scene
+    SceneManager m_sceneManager;
 };
 

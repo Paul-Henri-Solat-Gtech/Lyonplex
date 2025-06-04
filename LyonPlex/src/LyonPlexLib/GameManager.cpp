@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "GameManager.h"
 
+#include "SampleScene.h"
+
 GameManager::GameManager(HINSTANCE hInstance) : m_hInstance(hInstance)
 {
 }
@@ -24,6 +26,18 @@ bool GameManager::Init()
     m_ECS.Init(m_renderer.GetGraphicsDevice(), m_renderer.GetCommandManager(), m_renderer.GetRender3D());
 
     m_isRunning = true;
+
+    // 3) Init scene
+    m_sceneManager.Init(&m_ECS);
+    SampleScene* newSampleScene = new SampleScene();
+    m_sceneManager.CreateScene(newSampleScene, "SampleScene");
+    
+    // 4) Set Scene
+    m_sceneManager.SetScene("SampleScene");
+
+    // 5) Start scene (can be put in set scene)
+    m_sceneManager.StartScene();
+
     return true;
 }
 
@@ -88,6 +102,7 @@ int GameManager::Run()
         // UPDATE
         m_renderer.Update();
         m_ECS.m_systemMgr.UpdateAll(0);
+        m_sceneManager.UpdateScene();
 
         // Enregistrement et envoi des commandes
         
@@ -112,6 +127,7 @@ int GameManager::Run()
 void GameManager::Release()
 {
     m_renderer.Release();
+    m_sceneManager.ReleaseScene();
 }
 
 

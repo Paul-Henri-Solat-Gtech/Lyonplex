@@ -183,5 +183,4 @@ void Render3D::UpdateAndBindCB(Entity ent)
 	//    Remarquez : on donne l’adresse GPU virtuelle du buffer entier
 	mp_commandManager->GetCommandList()->SetGraphicsRootConstantBufferView(/*rootParameterIndex=*/ 1, m_cbTransformUpload->GetGPUVirtualAddress() + finalOffset);
 	D3D12_GPU_VIRTUAL_ADDRESS gpuAddress = m_cbTransformUpload->GetGPUVirtualAddress();
-	//OutputDebugStringA((std::string("CB GPU Address: ") + std::to_string(gpuAddress) + "\n").c_str());
 }

@@ -20,6 +20,8 @@ public:
     // Queue destruction to avoid modifying during iteration
     void DestroyEntity(Entity e);
 
+    int GetEntityCount() { return m_entityMgr.GetEntityCount(); }
+
     // Add/remove m_components
     template<typename T>
     void AddComponent(Entity entity, T* comp)

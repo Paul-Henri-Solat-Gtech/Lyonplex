@@ -4,7 +4,7 @@
 #include "GraphicsPipeline.h"
 #include "MeshManager.h"
 
-inline UINT Align256(UINT size) { return (size + 255) & ~255; }
+inline UINT Align256(UINT size) { return (size + 255) & ~255; } //	Mettre dans Utils ??
 
 struct ConstantBuffData
 {
@@ -17,16 +17,18 @@ class Render3D : public IRender
 public:
 	bool Init(HWND windowHandle, ECSManager* ECS, GraphicsDevice* graphicsDevice, DescriptorManager* descriptorManager, CommandManager* commandManager) override;
 	
-	bool InitConstantBuffer();
-
-	void UpdateAndBindConstantBuffer(Entity ent/*, XMMATRIX viewMatrix, XMMATRIX projMatrix*/);
 	
 	void Resize(int w, int h) override;
 	void RecordCommands() override;
 	void CreatePipeline() override; // Managing chain for 3D elements (data not draw)
 
-	GraphicsPipeline GetGraphicsPipeline() { return m_graphicsPipeline; };
+	GraphicsPipeline& GetGraphicsPipeline() { return m_graphicsPipeline; };
 
+
+	bool InitConstantBuffer();
+	void UpdateCbParams();
+	void UpdateAndBindCB(Entity ent);
+	
 	void Release();
 
 private:
@@ -45,12 +47,12 @@ private:
 	// Data linked to cBuffer VertexParam
 	ComPtr<ID3D12Resource>	m_cbTransformUpload = nullptr;
 	void*					m_mappedCBData = nullptr;
-	UINT					m_cbSize = 0; // taille alignee a 256
+	UINT					m_cbSize = Align256(sizeof(ConstantBuffData)); // taille alignee a 256
 
 	// TEST
-	UINT entityCount = 1000;
-	UINT frameCount = 2;
-	UINT cbSize = Align256(sizeof(ConstantBuffData));
-	UINT totalSize = cbSize * entityCount * frameCount;
+	UINT m_entityCount = 0;
+	UINT m_frameCount = 0;
+	UINT totalSize = 0;
+	
 };
 

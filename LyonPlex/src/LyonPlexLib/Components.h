@@ -41,7 +41,7 @@ struct CameraComponent : public Component {
     static constexpr uint32_t StaticTypeID = Camera_ID; // Choisissez un ID libre (> 3 dans votre exemple)
 
     // Position et vecteurs de base
-    XMFLOAT3 position = { 0.0f, 0.0f, -1.0f }; // camera placee 5 unites en -Z
+    XMFLOAT3 position = { 0.0f, 0.0f, -1.0f }; // camera placee 1 unites en -Z
     XMFLOAT3 forward = { 0.0f, 0.0f,  1.0f };
     XMFLOAT3 up = { 0.0f, 1.0f,  0.0f };
     XMFLOAT3 right = { 1.0f, 0.0f,  0.0f };

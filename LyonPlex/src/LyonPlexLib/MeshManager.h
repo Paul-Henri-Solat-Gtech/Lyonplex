@@ -7,28 +7,29 @@ struct VertexParam
 {
 	XMFLOAT3 Position;		// Position des points
 	XMFLOAT4 Color;			// Couleur des points
-	//XMFLOAT2 TexCoord;	// Coordonées du point sur la texture ?
+	//XMFLOAT2 TexCoord;	// Coordonees du point sur la texture ?
 	//XMFLOAT3 Normal;		// Normale ・la face visible du mesh (vecteur de direction)
 };
 
+
 struct MeshData
 {
-	std::vector<VertexParam> vertices;   // ici, on stocke directement les VertexParam (pas des pointeurs pcq struct légère)
+	std::vector<VertexParam> vertices;   // ici, on stocke directement les VertexParam (pas des pointeurs pcq struct legere)
 	std::vector<uint16_t> indices;
-	UINT vOffset = 0;   // décalage dans le buffer global
+	UINT vOffset = 0;   // decalage dans le buffer global
 	UINT vSize = 0;   // nombre de sommets
-	UINT iOffset = 0;   // décalage dans le buffer global
+	UINT iOffset = 0;   // decalage dans le buffer global
 	UINT iSize = 0;   // nombre d’indices
 
 	bool LoadFromFile(const std::string& path)
 	{
 		// ici tu lis le fichier (obj, fbx, gltf, etc.),
 		// tu fills `vertices` et `indices`,
-		// et tu retournes true/false suivant le succès.
+		// et tu retournes true/false suivant le succes.
 	}
 	void Unload()
 	{
-		// si tu veux désallouer ou libérer toute ressource GPU associée
+		// si tu veux desallouer ou liberer toute ressource GPU associee
 		vertices.clear();
 		indices.clear();
 	}
@@ -75,5 +76,6 @@ private:
 
 	// Bibliotheque de meshs
 	ResourceManager<MeshData> m_meshLibrary;
+
 };
 

@@ -4,12 +4,12 @@ class DescriptorManager
 public:
 	bool Init(GraphicsDevice* graphicsDevice);
 
-	void CreateDescriptorManager();
+	void CreateDescriptors();
 
 	ComPtr<ID3D12DescriptorHeap>& GetRtvHeap(){ return m_rtvHeap; };
 	UINT& GetRtvDescriptorSize() { return m_rtvDescriptorSize; };
 
-    // Appelées une seule fois à l’init
+    // Appelees une seule fois a l’init
     void CreateRtvHeap(UINT numDescriptors);
     void CreateSrvHeap(UINT numDescriptors);
     void CreateDsvHeap(UINT numDescriptors);
@@ -36,7 +36,7 @@ public:
 
 private:
 
-    // Méthode générique interne
+    // Methode generique interne
     void CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, bool shaderVisible, ComPtr<ID3D12DescriptorHeap>& heap, UINT& descriptorSize, UINT& nextOffset);
 
     D3D12_CPU_DESCRIPTOR_HANDLE AllocateCPU(ComPtr<ID3D12DescriptorHeap>& heap, UINT descriptorSize, UINT& nextOffset);

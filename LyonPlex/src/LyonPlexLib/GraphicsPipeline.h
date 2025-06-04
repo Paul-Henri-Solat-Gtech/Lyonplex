@@ -23,7 +23,7 @@ private:
 	ComPtr<ID3DBlob> m_psBlob;							// bytecode du pixel shader
 	ComPtr<ID3DBlob> m_errorBlob;						// messages d’erreur de compilation
 
-	ComPtr<ID3D12RootSignature> m_rootSignature;		// Décrit les ressources accessibles par les shaders
-	ComPtr<ID3D12PipelineState> m_pipelineState;		// Contient l'état complet du pipeline graphique
+	ComPtr<ID3D12RootSignature> m_rootSignature;		// Decrit les ressources accessibles par les shaders
+	ComPtr<ID3D12PipelineState> m_pipelineState;		// Contient l'etat complet du pipeline graphique
 };
 

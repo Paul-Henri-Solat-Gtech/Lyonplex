@@ -8,9 +8,10 @@ bool DescriptorManager::Init(GraphicsDevice* graphicsDevice)
     return true;
 }
 
-void DescriptorManager::CreateDescriptorManager()
+void DescriptorManager::CreateDescriptors()
 {
     CreateRtvHeap(mp_graphicsDevice->GetFrameCount());
+    CreateDsvHeap(mp_graphicsDevice->GetFrameCount());
 }
 
 void DescriptorManager::CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, bool shaderVisible, ComPtr<ID3D12DescriptorHeap>& heap, UINT& descriptorSize, UINT& nextOffset)

@@ -8,7 +8,7 @@
 #include "GraphicsDevice.h"
 #include "DescriptorManager.h"
 #include "CommandManager.h"
-#include "CameraManager.h"
+//#include "CameraManager.h"
 #include "Render3D.h"
 
 class RenderingManager

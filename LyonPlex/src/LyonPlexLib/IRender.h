@@ -2,9 +2,13 @@
 
 #include "ECSManager.h"
 
-#include "GraphicsDevice.h"
-#include "CommandManager.h"
-#include "DescriptorManager.h"
+//#include "GraphicsDevice.h"
+//#include "CommandManager.h"
+//#include "DescriptorManager.h"
+
+class GraphicsDevice;
+class CommandManager;
+class DescriptorManager;
 
 struct IRender 
 {

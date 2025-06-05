@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "CommandManager.h"
-#include "Render3D.h"
-#include "GraphicsDevice.h"
-#include "InputManager.h"
+//#include "CommandManager.h"
+//#include "Render3D.h"
+//#include "GraphicsDevice.h"
+//#include "InputManager.h"
 
 struct CameraBuffer
 {

@@ -35,13 +35,53 @@ void CameraSystem::Update(ECSManager& ecs, float dt)
 {
 	// 1) On recherche l'entite qui a un CameraComponent.
 	//    (On suppose qu’il n’y a qu’une seule entite “camera” active.)
-	ComponentMask camMask = (1ULL << CameraComponent::StaticTypeID);
+	ComponentMask camMask = (1ULL << CameraComponent::StaticTypeID | 1ULL << TransformComponent::StaticTypeID);
 	ecs.ForEach(camMask, [&](Entity e) {
 		auto* cam = ecs.GetComponent<CameraComponent>(e);
+		auto* tComp = ecs.GetComponent<TransformComponent>(e);
 		if (!cam) return;
 
-		// 2) Gerer l’input clavier/souris pour bouger/faire tourner la camera
-		HandleInputAndMove(cam, dt);
+		// 2) ici la liaison entre la pos et orientation
+        {
+            if (tComp->parent.id != UINT32_MAX)
+            {
+                Entity eParent;
+                eParent.id = tComp->parent.id;
+                auto* tParent = ecs.GetComponent<TransformComponent>(eParent);
+
+                cam->position = tParent->position;
+                cam->position.x += tComp->position.x;
+                cam->position.y += tComp->position.y;
+                cam->position.z += tComp->position.z;
+            }
+            else
+            {
+                // Copier la position directement
+                cam->position = tComp->position;
+            }
+
+            // Charger le quaternion de rotation
+            XMVECTOR qRot = XMLoadFloat4(&tComp->rotation);
+
+            // Vecteurs de base (dans l'espace local de la caméra)
+            static const XMVECTOR defaultForward = XMVectorSet(0.f, 0.f, 1.f, 0.f);
+            static const XMVECTOR defaultUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+            static const XMVECTOR defaultRight = XMVectorSet(1.f, 0.f, 0.f, 0.f);
+
+            // Tourner ces vecteurs par le quaternion
+            XMVECTOR vForward = XMVector3Rotate(defaultForward, qRot);
+            XMVECTOR vUp = XMVector3Rotate(defaultUp, qRot);
+            XMVECTOR vRight = XMVector3Rotate(defaultRight, qRot);
+
+            // Stocker les résultats dans le CameraComponent
+            XMStoreFloat3(&cam->forward, vForward);
+            XMStoreFloat3(&cam->up, vUp);
+            XMStoreFloat3(&cam->right, vRight);
+
+            // Indiquer que la vue doit être recalculée
+            cam->viewDirty = true;
+        }
+
 
 		// 3) Si necessaire, recalculer la matrice view
 		if (cam->viewDirty) {

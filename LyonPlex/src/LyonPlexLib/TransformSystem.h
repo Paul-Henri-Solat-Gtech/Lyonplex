@@ -19,6 +19,8 @@ public:
 
     virtual void Render(ECSManager& ecs) override { }
 
+    std::unordered_map<uint32_t, XMMATRIX>& GetWorldMatrix() { return worldMatrices; }
+
 private:
     // Calcule recursivement la matrice monde pour l’entite "entity"
     XMMATRIX ComputeWorldMatrix(Entity entity, ECSManager& ecs);

@@ -23,6 +23,8 @@ public:
 	const UINT& const GetFrameCount() { return FRAMECOUNT; };
 	UINT& GetFrameIndex() { return m_frameIndex; };
 
+	HWND GetWindow() { return m_windowWP; }
+
 	void Present();
 
 	void Release();

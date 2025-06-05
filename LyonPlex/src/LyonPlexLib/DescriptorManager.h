@@ -6,14 +6,18 @@ public:
 
 	void CreateDescriptors();
 
+    void CreateDepthStencilFormat(int i);
+
 	ComPtr<ID3D12DescriptorHeap>& GetRtvHeap(){ return m_rtvHeap; };
 	UINT& GetRtvDescriptorSize() { return m_rtvDescriptorSize; };
+	UINT& GetDsvDescriptorSize() { return m_dsvDescriptorSize; };
 
     // Appelees une seule fois a l’init
     void CreateRtvHeap(UINT numDescriptors);
     void CreateSrvHeap(UINT numDescriptors);
     void CreateDsvHeap(UINT numDescriptors);
     void CreateSamplerHeap(UINT numDescriptors);
+
 
     // Allocation CPU/GPU pour chaque type
     D3D12_CPU_DESCRIPTOR_HANDLE AllocateSrvCPU() { return AllocateCPU(m_srvHeap, m_srvDescriptorSize, m_srvNextOffset); }
@@ -44,6 +48,9 @@ private:
     D3D12_GPU_DESCRIPTOR_HANDLE AllocateGPU(ComPtr<ID3D12DescriptorHeap>& heap, UINT descriptorSize, UINT& nextOffset);
 
     GraphicsDevice* mp_graphicsDevice;
+
+    // Resources DSV
+    std::vector<ComPtr<ID3D12Resource>> m_depthResources;
 
     // Membres distincts
     ComPtr<ID3D12DescriptorHeap> m_rtvHeap; // TAS de descripteurs pour les render target views (RTV)

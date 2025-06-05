@@ -23,6 +23,8 @@ void GraphicsPipeline::CreateRootSignature()
     rootParams[0].InitAsConstantBufferView(0); // <- b0 côte shader pour camera (view & proj)
     rootParams[1].InitAsConstantBufferView(1); // <- b1 côte shader pour transform (world)
 
+    // Params supplementaires
+
     // 2) Construire la root signature
     D3D12_ROOT_SIGNATURE_DESC rootSigDesc = {};
     rootSigDesc.NumParameters = _countof(rootParams);
@@ -85,6 +87,7 @@ void GraphicsPipeline::CreatePipelineStateObject()
     {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,   0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
         {"COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+        // Ajouter params supplémentaires
     };
 
     // 4) PSO
@@ -93,15 +96,36 @@ void GraphicsPipeline::CreatePipelineStateObject()
     psoDesc.pRootSignature = m_rootSignature.Get();
     psoDesc.VS = { m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize() };
     psoDesc.PS = { m_psBlob->GetBufferPointer(), m_psBlob->GetBufferSize() };
-    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    
+    // ) Rasterizer State : on veut afficher la face extérieure, winding CCW = front
+    D3D12_RASTERIZER_DESC rasterDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    rasterDesc.CullMode = D3D12_CULL_MODE_BACK;          // On élimine les faces arrière (celles qu'on ne veut pas voir)
+    rasterDesc.FrontCounterClockwise = TRUE;             // CCW = face avant, CW = face arrière 
+    rasterDesc.FillMode = D3D12_FILL_MODE_SOLID;         // Remplir normalement
+    rasterDesc.DepthClipEnable = TRUE;
+
+    psoDesc.RasterizerState = rasterDesc;
+
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDesc.DepthStencilState.DepthEnable = FALSE;
-    psoDesc.DepthStencilState.StencilEnable = FALSE;
+    
+    // 5) Depth-Stencil State : ON et test LESS pour un cube « normal »
+    D3D12_DEPTH_STENCIL_DESC depthDesc = {};
+    depthDesc.DepthEnable = TRUE;
+    depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+    depthDesc.StencilEnable = FALSE; // Pas de stencil pour l'instant
+
+    psoDesc.DepthStencilState = depthDesc;
+
+    // Render Target & Sample
     psoDesc.SampleMask = UINT_MAX;
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesc.NumRenderTargets = 1;
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     psoDesc.SampleDesc.Count = 1;
+
+    // Ajouter params supplementaires
 
     mp_graphicsDevice->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState));
 }

@@ -29,7 +29,7 @@ public:
         return newID;
     }
 
-    // Ajoute manuellement une ressource dejÅEremplie et renvoie son ID
+    // Ajoute manuellement une ressource dejÅa remplie et renvoie son ID
     ResourceID Add(const T& data) 
     {
         ResourceID newID = static_cast<ResourceID>(m_resources.size());

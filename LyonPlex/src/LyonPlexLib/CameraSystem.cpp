@@ -50,6 +50,9 @@ void CameraSystem::Update(ECSManager& ecs, float dt)
                 auto* tParent = ecs.GetComponent<TransformComponent>(eParent);
 
                 cam->position = tParent->position;
+                cam->position.x += tComp->position.x;
+                cam->position.y += tComp->position.y;
+                cam->position.z += tComp->position.z;
             }
             else
             {

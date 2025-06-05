@@ -36,26 +36,26 @@ void SampleScene::Start()
    Entity eCube2 = mp_EcsManager->CreateEntity();
    mp_EcsManager->AddComponent<MeshComponent>(eCube2, new MeshComponent(2, 0));
    mp_EcsManager->AddComponent<TransformComponent>(eCube2, new TransformComponent());
-   mp_EcsManager->GetComponent<TransformComponent>(eCube2)->position = { 10, -0, 0 };
+   mp_EcsManager->GetComponent<TransformComponent>(eCube2)->position = { 5, -0, 0 };
    mp_EcsManager->GetComponent<TransformComponent>(eCube2)->dirty = true;
    AddEntityToScene(eCube2, "cube2");
 
    Entity eCube3 = mp_EcsManager->CreateEntity();
    mp_EcsManager->AddComponent<MeshComponent>(eCube3, new MeshComponent(2, 0));
    mp_EcsManager->AddComponent<TransformComponent>(eCube3, new TransformComponent());
-   mp_EcsManager->GetComponent<TransformComponent>(eCube3)->position = { -10, -0, 0 };
+   mp_EcsManager->GetComponent<TransformComponent>(eCube3)->position = { -5, -0, 0 };
    mp_EcsManager->GetComponent<TransformComponent>(eCube3)->dirty = true;
    AddEntityToScene(eCube3, "eCube3");
    Entity eCube4 = mp_EcsManager->CreateEntity();
    mp_EcsManager->AddComponent<MeshComponent>(eCube4, new MeshComponent(2, 0));
    mp_EcsManager->AddComponent<TransformComponent>(eCube4, new TransformComponent());
-   mp_EcsManager->GetComponent<TransformComponent>(eCube4)->position = { 0, -0, 10 };
+   mp_EcsManager->GetComponent<TransformComponent>(eCube4)->position = { 0, -0, 5 };
    mp_EcsManager->GetComponent<TransformComponent>(eCube4)->dirty = true;
    AddEntityToScene(eCube4, "eCube4");
    Entity eCube5 = mp_EcsManager->CreateEntity();
    mp_EcsManager->AddComponent<MeshComponent>(eCube5, new MeshComponent(2, 0));
    mp_EcsManager->AddComponent<TransformComponent>(eCube5, new TransformComponent());
-   mp_EcsManager->GetComponent<TransformComponent>(eCube5)->position = { 0, -0, 10 };
+   mp_EcsManager->GetComponent<TransformComponent>(eCube5)->position = { 0, -0, 5 };
    mp_EcsManager->GetComponent<TransformComponent>(eCube5)->dirty = true;
    AddEntityToScene(eCube5, "eCube5");
 

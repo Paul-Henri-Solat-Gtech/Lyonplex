@@ -27,6 +27,7 @@ void Scene::Update()
 void Scene::Release()
 {
 	m_sceneEntities.clear();
+	mp_EcsManager->ClearAllEntities();
 }
 
 void Scene::AddEntityToScene(Entity entity, const std::string& entityName)
@@ -36,6 +37,20 @@ void Scene::AddEntityToScene(Entity entity, const std::string& entityName)
 	newEntity.name = entityName;
 
 	m_sceneEntities.push_back(newEntity);
+}
+
+SceneEntity Scene::CreateEntity(const std::string& entityName)
+{
+	Entity newEntity;
+
+
+	SceneEntity newEntityScene;
+	newEntityScene.entity = newEntity;
+	newEntityScene.name = entityName;
+
+	m_sceneEntities.push_back(newEntityScene);
+
+	return SceneEntity();
 }
 
 Entity* Scene::GetEntity(const std::string& entityName)

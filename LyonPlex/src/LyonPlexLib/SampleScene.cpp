@@ -104,5 +104,5 @@ void SampleScene::Update()
 
 void SampleScene::Release()
 {
-
+    
 }

@@ -19,6 +19,9 @@ public:
 
 	void SetEcsManager(ECSManager* ecsManager) { mp_EcsManager = ecsManager; };
 	void AddEntityToScene(Entity entity, const std::string& entityName); // Only entities who need to get update like player or camera, not background or trees ..
+	//void AddEntityToScene(SceneEntity sceneEntity); // Only entities who need to get update like player or camera, not background or trees ..
+	
+	SceneEntity CreateEntity(const std::string& entityName);
 
 	Entity* GetEntity(const std::string& entityName);
 

@@ -35,49 +35,79 @@ void Render3D::Resize(int w, int h)
 
 void Render3D::RecordCommands()
 {
-	// Definir le viewport et le scissor  (peuvent servir a "fenetrer" de l'affichage, par exemple pour minimap) : PEUT ETRE GENERAL OU VARIABLE
-	// Le viewport represente la zone de la fenetre dans laquelle on va dessiner
-	D3D12_VIEWPORT viewport = {};
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = 800;  // window width
-	viewport.Height = 600;  // window height
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
-	// Le scissor defini un rectangle de pixels a dessiner dans la zone de dessin (viewport). Tous les pixels en dehors de cette zone ne sont pas dessines.
-	D3D12_RECT scissorRect = { 0, 0, 800, 600 };
 
 	// On definie la pipeline et la rootSignature
 	mp_commandManager->GetCommandList()->SetGraphicsRootSignature(m_graphicsPipeline.GetRootSignature().Get());
 	mp_commandManager->GetCommandList()->SetPipelineState(m_graphicsPipeline.GetPipelineState().Get());
 
-	// Actualisation du rectangle dans lequel on dessine, dans la fenetre
-	mp_commandManager->GetCommandList()->RSSetViewports(1, &viewport);
-	mp_commandManager->GetCommandList()->RSSetScissorRects(1, &scissorRect);
-
-	UINT frameIndex = mp_graphicsDevice->GetFrameIndex();
-	// calcule a la volee le handle CPU vers le i-eme RTV
-	auto rtvHandle = mp_descriptorManager->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart();
-	rtvHandle.ptr += UINT64(frameIndex) * mp_descriptorManager->GetRtvDescriptorSize();
-
-	// On definie le RTV sur lequel on va dessiner (pour nous les 3 RTV sont les memes je crois)
-	mp_commandManager->GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-
-	const float clearColor[] = { 0.0f, 0.7f, 0.7f, 1.0f };
-	mp_commandManager->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	// Ajouter ClearDepthStencilView() quand on l'aura ajoute a la pipeline
-
-
+	// Bind du buffer ViewProj de la Camera au slot b0
 	mp_commandManager->GetCommandList()->SetGraphicsRootConstantBufferView(
 		/*rootParameterIndex=*/ 0,
 		m_ECS->m_systemMgr.GetCameraSystem().GetCBbuffer()->GetGPUVirtualAddress()
 	);
 
-	//Draw vertices (mesh)
+	//Draw vertices and index (mesh)
 	mp_commandManager->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mp_commandManager->GetCommandList()->IASetVertexBuffers(0, 1, &m_meshManager.GetGlobalVBView());
 	mp_commandManager->GetCommandList()->IASetIndexBuffer(&m_meshManager.GetGlobalIBView());
+
+
+
+
+	UINT frameIdx = mp_graphicsDevice->GetFrameIndex();
+	// Clear RTV
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
+		mp_descriptorManager->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(),
+		frameIdx,
+		mp_descriptorManager->GetRtvDescriptorSize()
+	);
+	const float clearColor[] = { 0.1f, 0.2f, 0.3f, 1.0f };
+	mp_commandManager->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+	// Clear DSV
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(
+		mp_descriptorManager->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart(),
+		frameIdx,
+		mp_descriptorManager->GetDsvDescriptorSize()
+	);
+	mp_commandManager->GetCommandList()->ClearDepthStencilView(dsvHandle,
+		D3D12_CLEAR_FLAG_DEPTH,  // seulement clear la profondeur
+		1.0f,
+		0,
+		0, nullptr);
+
+	// F) OMSetRenderTargets (RTV + DSV)
+	mp_commandManager->GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+
+
+
+
+
+	// Get la width et height du client (fenetre)
+	RECT rc;
+	int width = 0;
+	int height = 0;
+	if (GetClientRect(mp_graphicsDevice->GetWindow(), &rc))
+	{
+		width = rc.right - rc.left;   // largeur de la zone client
+		height = rc.bottom - rc.top;    // hauteur de la zone client
+	}
+
+	// Definir le viewport et le scissor  (peuvent servir a "fenetrer" de l'affichage, par exemple pour minimap) : PEUT ETRE GENERAL OU VARIABLE
+	// Le viewport represente la zone de la fenetre dans laquelle on va dessiner
+	D3D12_VIEWPORT viewport = {};
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = width;  // window width
+	viewport.Height = height;  // window height
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	// Le scissor defini un rectangle de pixels a dessiner dans la zone de dessin (viewport). Tous les pixels en dehors de cette zone ne sont pas dessines.
+	D3D12_RECT scissorRect = { 0, 0, width, height };
+	// Actualisation du rectangle dans lequel on dessine, dans la fenetre
+	mp_commandManager->GetCommandList()->RSSetViewports(1, &viewport);
+	mp_commandManager->GetCommandList()->RSSetScissorRects(1, &scissorRect);
 
 	ComponentMask renderMask = 1ULL << MeshComponent::StaticTypeID;
 	// Boucle sur toutes les entity a dessiner (componentMask MeshComponent)
@@ -160,27 +190,21 @@ void Render3D::UpdateAndBindCB(Entity ent)
 		return;
 
 	// 2) Calculer la matrice monde (XMMATRIX) depuis tc->position/rotation/scale
-	//    (votre TransformSystem aura deja mis a jour worldMatrices)
 	XMMATRIX world = m_ECS->m_systemMgr.GetTransformSystem().worldMatrices[ent.id];
 
 	// 3) Construire le struct ConstantBuffData
 	ConstantBuffData cbData;
 	XMStoreFloat4x4(&cbData.World, XMMatrixTranspose(world));
 
-
 	UpdateCbParams();
 	UINT entityOffset = ent.id * m_cbSize;
 	UINT frameOffset = mp_graphicsDevice->GetFrameIndex() * m_entityCount * m_cbSize;
 	UINT finalOffset = frameOffset + entityOffset;
 
-
-
 	//// 4) Copier les donnees dans le buffer upload mappe
-	//memcpy(m_mappedCBData, &cbData, sizeof(ConstantBuffData));
 	memcpy((BYTE*)m_mappedCBData + finalOffset, &cbData, sizeof(ConstantBuffData));
 
-	// 5) Binder le constant buffer au root slot 0 (register b0)
-	//    Remarquez : on donne l’adresse GPU virtuelle du buffer entier
+	// 5) Binder le constant buffer au root slot 0 (register b0) avec offset
 	mp_commandManager->GetCommandList()->SetGraphicsRootConstantBufferView(/*rootParameterIndex=*/ 1, m_cbTransformUpload->GetGPUVirtualAddress() + finalOffset);
 	D3D12_GPU_VIRTUAL_ADDRESS gpuAddress = m_cbTransformUpload->GetGPUVirtualAddress();
 }

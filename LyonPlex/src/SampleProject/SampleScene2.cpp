@@ -3,6 +3,8 @@
 
 void SampleScene2::Start()
 {
+	//CreateEntity("bloc");
+	
 }
 
 void SampleScene2::Update()

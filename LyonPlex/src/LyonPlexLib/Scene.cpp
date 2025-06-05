@@ -8,15 +8,6 @@ void Scene::Init()
 void Scene::Start()
 {
 	OutputDebugStringA("\nScene has started ! \n");
-
-	/*Entity eTriangle = m_ECS->CreateEntity();
-	m_ECS->AddComponent<MeshComponent>(eTriangle, new MeshComponent(1, 0));
-
-	Entity eSquare = m_ECS->CreateEntity();
-	m_ECS->AddComponent<MeshComponent>(eSquare, new MeshComponent(0, 0));
-
-	Entity eCube = m_ECS->CreateEntity();
-	m_ECS->AddComponent<MeshComponent>(eCube, new MeshComponent(2, 0));*/
 }
 
 void Scene::Update()
@@ -41,14 +32,16 @@ void Scene::AddEntityToScene(Entity entity, const std::string& entityName)
 
 SceneEntity Scene::CreateEntity(const std::string& entityName)
 {
-	Entity newEntity;
+	Entity newEntity = mp_EcsManager->CreateEntity();
 
+	AddEntityToScene(newEntity, entityName);
 
-	SceneEntity newEntityScene;
-	newEntityScene.entity = newEntity;
-	newEntityScene.name = entityName;
-
-	m_sceneEntities.push_back(newEntityScene);
+	//	Adding basics component(s) for any entity in scene & default parameters :
+	//	TRANSFORM
+	AddComponent<TransformComponent>(entityName, new TransformComponent());
+	GetComponent<TransformComponent>(entityName)->position = { 0, 0, 0 };
+	GetComponent<TransformComponent>(entityName)->dirty = true;
+	//	... Add other component here if needed
 
 	return SceneEntity();
 }

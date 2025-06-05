@@ -11,7 +11,7 @@ struct CreatedScene
 class SceneManager
 {
 public:
-	void Init(ECSManager* ecsManager);
+	void Init(ECSManager* ecsManager, HWND windowHandle);
 
 	void StartScene();
 	void UpdateScene();
@@ -26,10 +26,12 @@ public:
 private:
 	// Ressources
 	ECSManager* mp_ecsManager;
+	HWND m_windowHandle; // Just for debug and window name
 
 	// Scene active
 	CreatedScene m_scene;
-	
+	bool m_sceneAsSarted = true;
+
 	// Scene list
 	std::vector<CreatedScene> m_scenes;
 };

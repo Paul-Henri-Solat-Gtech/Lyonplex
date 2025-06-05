@@ -20,6 +20,8 @@ public:
 
     void Release();
 
+    SceneManager* GetSceneManager() { return &m_sceneManager; };
+
 private:
     void ProcessMessage(); // Gestion messages windows
 

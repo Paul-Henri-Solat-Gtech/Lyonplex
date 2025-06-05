@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "SceneManager.h"
 
-void SceneManager::Init(ECSManager* ecsManager)
+void SceneManager::Init(ECSManager* ecsManager, HWND windowHandle)
 {
 	mp_ecsManager = ecsManager;
+	m_windowHandle = windowHandle;
+	m_sceneAsSarted = true;
 }
 
 void SceneManager::StartScene()
@@ -14,6 +16,8 @@ void SceneManager::StartScene()
 		const char* sceneName = m_scene.sceneName.c_str();
 		std::string newMsg = "\n" + std::string(sceneName) + " Has been Loaded !\n";
 		OutputDebugStringA(newMsg.c_str());
+
+		m_sceneAsSarted = true;
 	}
 	else
 	{
@@ -24,7 +28,7 @@ void SceneManager::StartScene()
 
 void SceneManager::UpdateScene()
 {
-	if (m_scene.scene)
+	if (m_scene.scene && m_sceneAsSarted)
 	{
 		m_scene.scene->Update();
 	}
@@ -32,9 +36,10 @@ void SceneManager::UpdateScene()
 
 void SceneManager::ReleaseScene()
 {
-	if (m_scene.scene)
+	if (m_scene.scene && m_sceneAsSarted)
 	{
 		m_scene.scene->Release();
+		//m_sceneAsSarted = false;
 	}
 }
 
@@ -43,7 +48,7 @@ void SceneManager::CreateScene(Scene* scene, std::string sceneName)
 	CreatedScene newScene;
 	newScene.scene = scene;
 	newScene.sceneName = sceneName;
-
+	
 	newScene.scene->SetEcsManager(mp_ecsManager);
 
 	m_scenes.push_back(newScene);
@@ -58,7 +63,17 @@ void SceneManager::SetScene(std::string sceneName)
 	{
 		if (sceneName == createdScene.sceneName)
 		{
-			m_scene = createdScene;
+			if (m_scene.scene)
+			{
+				ReleaseScene();		// Clear actual scene
+			}
+			m_scene = createdScene; // Set the new scene
+			StartScene();			// Start the new scene
+
+			// Update WindowTitle
+			std::string titleW = "[LyonPlex] [ scene : " + sceneName + " ]";
+			std::wstring wname(titleW.begin(), titleW.end());
+			SetWindowText(m_windowHandle, wname.c_str());
 		}
 	}
 }

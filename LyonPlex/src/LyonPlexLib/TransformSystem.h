@@ -1,7 +1,10 @@
 #pragma once
-
+#include <unordered_map>
+#include "ECSManager.h"
 #include "ISystem.h"
-class ECSManager;
+//#include "ComponentManager.h"
+//#include "TransformComponent.h"
+//#include <DirectXMath.h>
 
 class TransformSystem : public ISystem
 {

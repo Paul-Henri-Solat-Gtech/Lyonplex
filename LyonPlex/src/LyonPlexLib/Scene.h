@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SceneManager.h"
+class SceneManager;
 
 struct SceneEntity 
 {
@@ -11,11 +11,13 @@ struct SceneEntity
 class Scene
 {
 public:
-	void Init();
+	void Init(SceneManager* sceneManager);
 
 	virtual void Start();
 	virtual void Update();
 	virtual void Release();
+
+	void ChangeScene(std::string sceneName);
 
 	void SetEcsManager(ECSManager* ecsManager) { mp_EcsManager = ecsManager; };
 
@@ -52,6 +54,7 @@ public:
 protected:
 
 	ECSManager* mp_EcsManager;
+	SceneManager* mp_sceneManager;
 
 	std::vector<SceneEntity> m_sceneEntities;
 };

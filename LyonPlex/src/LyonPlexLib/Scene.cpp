@@ -1,8 +1,10 @@
 #include "pch.h"
 #include "Scene.h"
 
-void Scene::Init()
+void Scene::Init(SceneManager* sceneManager)
 {
+	mp_sceneManager = sceneManager;
+	Start();
 }
 
 void Scene::Start()
@@ -19,6 +21,11 @@ void Scene::Release()
 {
 	m_sceneEntities.clear();
 	mp_EcsManager->ClearAllEntities();
+}
+
+void Scene::ChangeScene(std::string sceneName)
+{
+	mp_sceneManager->SetScene(sceneName);
 }
 
 void Scene::AddEntityToScene(Entity entity, const std::string& entityName)

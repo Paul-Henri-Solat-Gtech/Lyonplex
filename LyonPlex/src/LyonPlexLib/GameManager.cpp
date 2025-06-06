@@ -29,14 +29,11 @@ bool GameManager::Init()
     m_isRunning = true;
 
     // 3) Init sceneManager
-    m_sceneManager.Init(&m_ECS, hwnd);
+    m_sceneManager.Init(&m_ECS,this,hwnd);
     
-    // 4) Create new scene
+    // 4) Create new scene (OPTIONAL IN LIB)
     SampleScene* newSampleScene = new SampleScene();
     m_sceneManager.CreateScene(newSampleScene, "SampleScene");
-    
-    // 4) Set & Start scene
-    m_sceneManager.SetScene("SampleScene");
 
     return true;
 }

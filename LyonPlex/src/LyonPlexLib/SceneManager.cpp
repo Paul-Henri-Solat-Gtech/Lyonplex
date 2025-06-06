@@ -1,23 +1,23 @@
 #include "pch.h"
 #include "SceneManager.h"
+#include "GameManager.h"
 
-void SceneManager::Init(ECSManager* ecsManager, HWND windowHandle)
+void SceneManager::Init(ECSManager* ecsManager, GameManager* gameManager, HWND windowHandle)
 {
 	mp_ecsManager = ecsManager;
+	mp_gameManager = gameManager;
 	m_windowHandle = windowHandle;
 	m_sceneAsSarted = true;
 }
 
 void SceneManager::StartScene()
 {
-	if (m_scene.scene) 
+	if (m_scene.scene)
 	{
-		m_scene.scene->Start();
+		m_scene.scene->Init(this);
 		const char* sceneName = m_scene.sceneName.c_str();
 		std::string newMsg = "\n" + std::string(sceneName) + " Has been Loaded !\n";
 		OutputDebugStringA(newMsg.c_str());
-
-		m_sceneAsSarted = true;
 	}
 	else
 	{
@@ -28,7 +28,7 @@ void SceneManager::StartScene()
 
 void SceneManager::UpdateScene()
 {
-	if (m_scene.scene && m_sceneAsSarted)
+	if (m_scene.scene)
 	{
 		m_scene.scene->Update();
 	}
@@ -36,7 +36,7 @@ void SceneManager::UpdateScene()
 
 void SceneManager::ReleaseScene()
 {
-	if (m_scene.scene && m_sceneAsSarted)
+	if (m_scene.scene)
 	{
 		m_scene.scene->Release();
 		//m_sceneAsSarted = false;
@@ -67,6 +67,7 @@ void SceneManager::SetScene(std::string sceneName)
 			{
 				ReleaseScene();		// Clear actual scene
 			}
+
 			m_scene = createdScene; // Set the new scene
 			StartScene();			// Start the new scene
 

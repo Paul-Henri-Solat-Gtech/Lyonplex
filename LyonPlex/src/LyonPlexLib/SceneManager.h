@@ -2,6 +2,8 @@
 
 #include "Scene.h"
 
+class GameManager;
+
 struct CreatedScene 
 {
 	std::string sceneName;
@@ -11,7 +13,7 @@ struct CreatedScene
 class SceneManager
 {
 public:
-	void Init(ECSManager* ecsManager, HWND windowHandle);
+	void Init(ECSManager* ecsManager,GameManager* gameManager , HWND windowHandle);
 
 	void StartScene();
 	void UpdateScene();
@@ -26,6 +28,7 @@ public:
 private:
 	// Ressources
 	ECSManager* mp_ecsManager;
+	GameManager* mp_gameManager;
 	HWND m_windowHandle; // Just for debug and window name
 
 	// Scene active

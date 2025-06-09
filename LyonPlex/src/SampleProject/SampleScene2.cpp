@@ -40,50 +40,50 @@ void SampleScene2::Start()
     GetComponent<TransformComponent>("camera")->dirty = true;
 }
 
-void SampleScene2::Update()
+void SampleScene2::Update(float deltatime)
 {
     //Input
     if (InputManager::GetKeyIsPressed('Z'))
     {
         //OutputDebugStringA("\nZ is pressed ! \n");
-        GetComponent<TransformComponent>("cube")->position.z += 0.1f;
+        GetComponent<TransformComponent>("cube")->position.z += 1.f * deltatime;
         GetComponent<TransformComponent>("cube")->dirty = true;
         GetComponent<TransformComponent>("camera")->dirty = true;
     }
     if (InputManager::GetKeyIsPressed('S'))
     {
-        GetComponent<TransformComponent>("cube")->position.z -= 0.1f;
+        GetComponent<TransformComponent>("cube")->position.z -= 1.f * deltatime;
         GetComponent<TransformComponent>("cube")->dirty = true;
         GetComponent<TransformComponent>("camera")->dirty = true;
     }
     if (InputManager::GetKeyIsPressed('Q'))
     {
-        GetComponent<TransformComponent>("cube")->position.x -= 0.1f;
+        GetComponent<TransformComponent>("cube")->position.x -= 1.f * deltatime;
         GetComponent<TransformComponent>("cube")->dirty = true;
         GetComponent<TransformComponent>("camera")->dirty = true;
     }
     if (InputManager::GetKeyIsPressed('D'))
     {
-        GetComponent<TransformComponent>("cube")->position.x += 0.1f;
+        GetComponent<TransformComponent>("cube")->position.x += 1.f * deltatime;
         GetComponent<TransformComponent>("cube")->dirty = true;
         GetComponent<TransformComponent>("camera")->dirty = true;
     }
     if (InputManager::GetKeyIsPressed(VK_SPACE))
     {
-        GetComponent<TransformComponent>("cube")->position.y += 0.1f;
+        GetComponent<TransformComponent>("cube")->position.y += 1.f * deltatime;
         GetComponent<TransformComponent>("cube")->dirty = true;
         GetComponent<TransformComponent>("camera")->dirty = true;
     }
     if (InputManager::GetKeyIsPressed(VK_CONTROL))
     {
-        GetComponent<TransformComponent>("cube")->position.y -= 0.1f;
+        GetComponent<TransformComponent>("cube")->position.y -= 1.f * deltatime;
         GetComponent<TransformComponent>("cube")->dirty = true;
         GetComponent<TransformComponent>("camera")->dirty = true;
         
     }
     if (InputManager::GetKeyIsReleased('A'))
     {
-        ChangeScene("SampleScene2");
+        ChangeScene("GameScene");
     }
 }
 

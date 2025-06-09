@@ -8,6 +8,7 @@
 #include <fstream> 
 #include <filesystem>
 #include <iostream>
+#include <debugapi.h>
 
 namespace Utils 
 {
@@ -57,7 +58,7 @@ namespace Utils
         return radians * (180.0f / PI);
     }
 
-    // Creation du "generateur aleatoire" necessaire ‡ la generation de nombres alÈatoires
+    // Creation du "generateur aleatoire" necessaire ÅEla generation de nombres alÈatoires
     static std::mt19937& rng() 
     {
         static std::mt19937 s_rng{ std::random_device{}() };
@@ -200,7 +201,7 @@ namespace Utils
     // 6. Transform
     // ----------------------------------------
     
-    /// Ajoute (accrÈdite) ‡ la rotation actuelle un incrÈment dÈfini
+    /// Ajoute (accrÈdite) ÅEla rotation actuelle un incrÈment dÈfini
     /// par trois angles Euler (en degrÈs) autour des axes X (pitch), Y (yaw), Z (roll).
 
     // AddRotation<TransformComponent>(tComp, a, b, c)
@@ -213,7 +214,7 @@ namespace Utils
         float r = XMConvertToRadians(deltaRollDeg);
 
         // 2) Construire le quaternion de l'incrÈment de rotation
-        //    (Èquivalent ‡ "tourner p autour de X, puis y autour de Y, puis r autour de Z")
+        //    (Èquivalent ÅE"tourner p autour de X, puis y autour de Y, puis r autour de Z")
         XMVECTOR incQv = XMQuaternionRotationRollPitchYaw(p, y, r);
 
         // 3) Charger le quaternion actuel (x,y,z,w) dans un XMVECTOR
@@ -221,7 +222,7 @@ namespace Utils
 
         // 4) Composer les deux quaternions : newQ = incQ * curQ
         //    (l'ordre importe : ici on applique incQ **avant** la rotation actuelle,
-        //     ce qui correspond ‡ un repËre local).
+        //     ce qui correspond ÅEun repËre local).
         XMVECTOR newQv = XMQuaternionMultiply(incQv, curQv);
 
         // 5) Normaliser (Èviter la dÈrive numÈrique)
@@ -250,7 +251,7 @@ namespace Utils
 
     
     // ----------------------------------------
-    // 7. (…ventuel) Extensions futuresÖ
+    // 7. (…ventuel) Extensions futuresÅE
     // ----------------------------------------
     // Vous pouvez ajouter ici : gestion des threads, alignement mÈmoire, etc.
 }

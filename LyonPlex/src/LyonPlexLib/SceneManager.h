@@ -16,7 +16,7 @@ public:
 	void Init(ECSManager* ecsManager,GameManager* gameManager , HWND windowHandle);
 
 	void StartScene();
-	void UpdateScene();
+	void UpdateScene(float deltatime);
 	void ReleaseScene();
 
 	void CreateScene(Scene* scene, std::string sceneName);
@@ -24,6 +24,8 @@ public:
 	void SetScene(std::string sceneName);
 	
 	//& GetScene() { return *m_scene; };
+
+	GameManager* GetGameManager() { return mp_gameManager; };
 
 private:
 	// Ressources

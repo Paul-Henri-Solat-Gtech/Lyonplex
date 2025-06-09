@@ -26,11 +26,11 @@ void SceneManager::StartScene()
 
 }
 
-void SceneManager::UpdateScene()
+void SceneManager::UpdateScene(float deltatime)
 {
 	if (m_scene.scene)
 	{
-		m_scene.scene->Update();
+		m_scene.scene->Update(deltatime);
 	}
 }
 

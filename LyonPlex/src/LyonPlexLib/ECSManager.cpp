@@ -14,8 +14,15 @@ void ECSManager::DestroyEntity(Entity e)
 
 void ECSManager::ClearAllEntities()
 {
-    m_entityMgr.ClearAllEntities();
-    m_componentMgr.ClearAllEntityComponents();
+    //m_entityMgr.ClearAllEntities();
+    //m_componentMgr.ClearAllEntityComponents();
+    
+    for (auto id : m_entityMgr.GetAll())
+    {
+        Entity e;
+        e.id = id;
+        DestroyEntity(e);
+    }
 }
 
 void ECSManager::EndFrame()

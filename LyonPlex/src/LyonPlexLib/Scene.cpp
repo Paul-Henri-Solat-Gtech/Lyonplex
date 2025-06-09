@@ -12,7 +12,7 @@ void Scene::Start()
 	OutputDebugStringA("\nScene has started ! \n");
 }
 
-void Scene::Update()
+void Scene::Update(float deltatime)
 {
 
 }

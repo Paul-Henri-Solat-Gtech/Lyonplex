@@ -16,7 +16,7 @@ void GameScene::Start()
     GetComponent<TransformComponent>("camera")->dirty = true;
 }
 
-void GameScene::Update()
+void GameScene::Update(float deltatime)
 {
     if (InputManager::GetKeyIsReleased('A'))
     {

@@ -40,7 +40,7 @@ void SampleScene::Start()
    GetComponent<TransformComponent>("camera")->dirty = true;
 }
 
-void SampleScene::Update()
+void SampleScene::Update(float deltatime)
 {
     //Input
     if (InputManager::GetKeyIsPressed('Z'))

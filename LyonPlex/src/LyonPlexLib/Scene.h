@@ -14,7 +14,7 @@ public:
 	void Init(SceneManager* sceneManager);
 
 	virtual void Start();
-	virtual void Update();
+	virtual void Update(float deltatime);
 	virtual void Release();
 
 	void ChangeScene(std::string sceneName);

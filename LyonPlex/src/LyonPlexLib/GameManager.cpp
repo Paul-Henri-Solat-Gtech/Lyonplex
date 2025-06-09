@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "GameManager.h"
+#include "Utils.h"
 
 // Scenes
 #include "SampleScene.h"
@@ -44,8 +45,17 @@ int GameManager::Run()
     int i = 0;
     // Message et boucle de rendu
     MSG msg = {};
-    while (m_isRunning) {
-        
+
+    // Delatime
+    float t = Utils::getTimeSeconds();
+
+    while (m_isRunning) 
+    {
+        // Delatime
+        m_deltaTime = Utils::getTimeSeconds() - t;
+        t = Utils::getTimeSeconds();
+
+
         // 1) Gestion des messages Windows
         ProcessMessage();
         float j = i * 0.1;
@@ -64,7 +74,7 @@ int GameManager::Run()
         // UPDATE
         m_renderer.Update();
         m_ECS.m_systemMgr.UpdateAll(0);
-        m_sceneManager.UpdateScene();
+        m_sceneManager.UpdateScene(m_deltaTime);
 
         // Enregistrement et envoi des commandes
         
@@ -79,6 +89,8 @@ int GameManager::Run()
 
         // Synchronisation CPU/GPU (on attend que le GPU ait fini)
         m_renderer.SynchroGPUCPU();
+
+        m_ECS.EndFrame();
     }
 
     Release();

@@ -6,6 +6,8 @@
 
 #include "SceneManager.h"
 
+#include "chrono"
+
 class GameManager 
 {
 public:
@@ -21,6 +23,7 @@ public:
     void Release();
 
     SceneManager* GetSceneManager() { return &m_sceneManager; };
+    float& GetDeltaTime() { return m_deltaTime; };
 
 private:
     void ProcessMessage(); // Gestion messages windows
@@ -30,6 +33,9 @@ private:
     RenderingManager m_renderer;
     ECSManager m_ECS;
     bool m_isRunning = false;
+
+    //deltatime
+    float m_deltaTime;
 
     //scene
     SceneManager m_sceneManager;

@@ -1,12 +1,10 @@
 ﻿#pragma once
 
-//#include "GraphicsDevice.h"
+#include "GraphicsDevice.h"
 #include "ResourceManager.h"
+#include "CommandManager.h"
 
-
-
-class GraphicsDevice;
-class CommandManager;
+//class GraphicsDevice;
 
 struct VertexParam
 {

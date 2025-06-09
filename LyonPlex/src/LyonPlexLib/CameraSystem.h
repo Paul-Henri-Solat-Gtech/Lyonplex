@@ -1,15 +1,15 @@
 #pragma once
-//#include "ECSManager.h"
+#include "ECSManager.h"
 //#include "ComponentManager.h"
 //#include "CommandManager.h" // pour recuperer le command list
 //#include "Render3D.h"      // pour acceder au root signature / pipeline state
 //#include "GraphicsDevice.h"
-//#include <Windows.h>
+
+#include <Windows.h>
 
 class GraphicsDevice;
 class CommandManager;
 class Render3D;
-class ECSManager;
 
 
 struct CBPerCamera {

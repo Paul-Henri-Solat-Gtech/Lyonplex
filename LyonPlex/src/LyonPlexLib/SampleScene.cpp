@@ -8,7 +8,7 @@ void SampleScene::Start()
    Entity camEntity = mp_EcsManager->CreateEntity();
    mp_EcsManager->AddComponent<CameraComponent>(camEntity, new CameraComponent());
    mp_EcsManager->AddComponent<TransformComponent>(camEntity, new TransformComponent());
-   mp_EcsManager->GetComponent<TransformComponent>(camEntity)->position = { 0, 0.4, -1 };
+   mp_EcsManager->GetComponent<TransformComponent>(camEntity)->position = { 0, 0, -1 };
 
    AddEntityToScene(camEntity, "camera");
 

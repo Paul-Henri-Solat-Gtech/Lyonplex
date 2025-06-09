@@ -3,7 +3,10 @@
 //#include "GraphicsDevice.h"
 #include "ResourceManager.h"
 
+
+
 class GraphicsDevice;
+class CommandManager;
 
 struct VertexParam
 {
@@ -40,7 +43,7 @@ struct MeshData
 class MeshManager
 {
 public:
-	void Init(GraphicsDevice* graphicsDevice);
+	void Init(GraphicsDevice* graphicsDevice, CommandManager* commandManager);
 
 	D3D12_VERTEX_BUFFER_VIEW& GetGlobalVBView() { return m_globalVBView; };
 	D3D12_INDEX_BUFFER_VIEW& GetGlobalIBView() { return m_globalIBView; };
@@ -63,6 +66,7 @@ private:
 
 
 	GraphicsDevice* mp_graphicsDevice;
+	CommandManager* mp_commandManager;
 
 
 	// Variables de Vertex et Index globales

@@ -2,6 +2,8 @@
 
 // THIS IS FOR BOTH PCH -> LIB & APP
 
+#include <d3d12.h> 
+
 //First Priority
 #include <iostream>
 #include <string>

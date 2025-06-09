@@ -1,9 +1,14 @@
 ﻿#include "pch.h"
+
 #include "MeshManager.h"
 
-void MeshManager::Init(GraphicsDevice* graphicsDevice)
+
+
+
+void MeshManager::Init(GraphicsDevice* graphicsDevice, CommandManager* commandManager)
 {
 	mp_graphicsDevice = graphicsDevice;
+	mp_commandManager = commandManager;
 
 	// Initialisation de tous les mesh
 	//InitializeMesh_Cube();
@@ -110,70 +115,123 @@ HRESULT MeshManager::BuildAndUploadGlobalBuffers()
 {
 	std::vector<VertexParam> globalVerts;
 	std::vector<uint16_t>  globalIdxs;
-	size_t vertexCursor = 0;
-	size_t indexCursor = 0;
-
-	// Parcours chaque MeshData enregistre (du plus petit ID au plus grand)
-	for (uint32_t id = 0; id < m_meshLibrary.Count(); ++id) 
-	{
-		MeshData& md = m_meshLibrary.Get(id);
-
-		// 1) Calculer et stocker les offsets
-		md.vOffset = static_cast<uint32_t>(vertexCursor);
-		md.vSize = static_cast<uint32_t>(md.vertices.size());
-		md.iOffset = static_cast<uint32_t>(indexCursor);
-		md.iSize = static_cast<uint32_t>(md.indices.size());
-
-		// 2) Ajouter les sommets de ce maillage a la suite
-		globalVerts.insert(globalVerts.end(), md.vertices.begin(), md.vertices.end());
-
-		// 3) Ajouter les indices, corriges par le decalage vOffset
-		for (auto idx : md.indices) 
-		{
-			globalIdxs.push_back(static_cast<uint16_t>(idx + md.vOffset));
-		}
-
-		vertexCursor += md.vSize;
-		indexCursor += md.iSize;
-	}
 
 
-	UINT vByteSize = UINT(globalVerts.size() * sizeof(VertexParam));
-	UINT iByteSize = UINT(globalIdxs.size() * sizeof(uint16_t));
+	UINT64 vByteSize = UINT64(globalVerts.size() * sizeof(VertexParam));
+	D3D12_RESOURCE_DESC vbDesc = CD3DX12_RESOURCE_DESC::Buffer(vByteSize);
 
-	D3D12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	// 2.1) Réserver en DefaultHeap (GPU local)
+	ComPtr<ID3D12Resource> defaultVB;
+	mp_graphicsDevice->GetDevice()->CreateCommittedResource
+	(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), 
+		D3D12_HEAP_FLAG_NONE,
+		&vbDesc,
+		D3D12_RESOURCE_STATE_COPY_DEST,  // on va copier dedans
+		nullptr,
+		IID_PPV_ARGS(&defaultVB)
+	);
 
-	// Vertex Buffer
-	{
-		auto vbDesc = CD3DX12_RESOURCE_DESC::Buffer(vByteSize);
-		mp_graphicsDevice->GetDevice()->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &vbDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_globalVertexBuffer));
+	ComPtr<ID3D12Resource> uploadVB;
+	mp_graphicsDevice->GetDevice()->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&vbDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&uploadVB)
+	);
 
-		void* pData = nullptr;
-		CD3DX12_RANGE readRange(0, 0);
-		m_globalVertexBuffer->Map(0, &readRange, &pData);
-		memcpy(pData, globalVerts.data(), vByteSize);
-		m_globalVertexBuffer->Unmap(0, nullptr);
+	void* pData = nullptr;
+	CD3DX12_RANGE readRange(0, 0);
+	uploadVB->Map(0, &readRange, &pData);
+	memcpy(pData, globalVerts.data(), size_t(vByteSize));
+	uploadVB->Unmap(0, nullptr);
 
-		m_globalVBView.BufferLocation = m_globalVertexBuffer->GetGPUVirtualAddress();
-		m_globalVBView.StrideInBytes = sizeof(VertexParam);
-		m_globalVBView.SizeInBytes = vByteSize;
-	}
+	// Avec UpdateSubresources (plus simple pour un buffer linéaire)
+	UpdateSubresources<1>(mp_commandManager->GetCommandList().Get(),
+		defaultVB.Get(),
+		uploadVB.Get(),
+		0, 0, 1,
+		&CD3DX12_SUBRESOURCE_DATA{ globalVerts.data(), static_cast<UINT>(vByteSize), 0 });
+	// Puis insérer une barrier pour passer le VB en état VERTEX_AND_CONSTANT_BUFFER
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		defaultVB.Get(),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+	);
+	mp_commandManager->GetCommandList()->ResourceBarrier(1, &barrier);
 
-	// Index Buffer
-	{
-		auto ibDesc = CD3DX12_RESOURCE_DESC::Buffer(iByteSize);
-		mp_graphicsDevice->GetDevice()->CreateCommittedResource( &heapProps, D3D12_HEAP_FLAG_NONE, &ibDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_globalIndexBuffer));
+	m_globalVBView.BufferLocation = defaultVB->GetGPUVirtualAddress();
+	m_globalVBView.StrideInBytes = sizeof(VertexParam);
+	m_globalVBView.SizeInBytes = UINT(vByteSize);
+	m_globalVertexBuffer = defaultVB; // On conserve la référence
 
-		void* pData = nullptr;
-		CD3DX12_RANGE readRange(0, 0);
-		m_globalIndexBuffer->Map(0, &readRange, &pData);
-		memcpy(pData, globalIdxs.data(), iByteSize);
-		m_globalIndexBuffer->Unmap(0, nullptr);
 
-		m_globalIBView.BufferLocation = m_globalIndexBuffer->GetGPUVirtualAddress();
-		m_globalIBView.Format = DXGI_FORMAT_R16_UINT;
-		m_globalIBView.SizeInBytes = iByteSize;
-	}
+	//size_t vertexCursor = 0;
+	//size_t indexCursor = 0;
+
+	//// Parcours chaque MeshData enregistre (du plus petit ID au plus grand)
+	//for (uint32_t id = 0; id < m_meshLibrary.Count(); ++id) 
+	//{
+	//	MeshData& md = m_meshLibrary.Get(id);
+
+	//	// 1) Calculer et stocker les offsets
+	//	md.vOffset = static_cast<uint32_t>(vertexCursor);
+	//	md.vSize = static_cast<uint32_t>(md.vertices.size());
+	//	md.iOffset = static_cast<uint32_t>(indexCursor);
+	//	md.iSize = static_cast<uint32_t>(md.indices.size());
+
+	//	// 2) Ajouter les sommets de ce maillage a la suite
+	//	globalVerts.insert(globalVerts.end(), md.vertices.begin(), md.vertices.end());
+
+	//	// 3) Ajouter les indices, corriges par le decalage vOffset
+	//	for (auto idx : md.indices) 
+	//	{
+	//		globalIdxs.push_back(static_cast<uint16_t>(idx + md.vOffset));
+	//	}
+
+	//	vertexCursor += md.vSize;
+	//	indexCursor += md.iSize;
+	//}
+
+
+	//UINT vByteSize = UINT(globalVerts.size() * sizeof(VertexParam));
+	//UINT iByteSize = UINT(globalIdxs.size() * sizeof(uint16_t));
+
+	//D3D12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+
+	//// Vertex Buffer
+	//{
+	//	auto vbDesc = CD3DX12_RESOURCE_DESC::Buffer(vByteSize);
+	//	mp_graphicsDevice->GetDevice()->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &vbDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_globalVertexBuffer));
+
+	//	void* pData = nullptr;
+	//	CD3DX12_RANGE readRange(0, 0);
+	//	m_globalVertexBuffer->Map(0, &readRange, &pData);
+	//	memcpy(pData, globalVerts.data(), vByteSize);
+	//	m_globalVertexBuffer->Unmap(0, nullptr);
+
+	//	m_globalVBView.BufferLocation = m_globalVertexBuffer->GetGPUVirtualAddress();
+	//	m_globalVBView.StrideInBytes = sizeof(VertexParam);
+	//	m_globalVBView.SizeInBytes = vByteSize;
+	//}
+
+	//// Index Buffer
+	//{
+	//	auto ibDesc = CD3DX12_RESOURCE_DESC::Buffer(iByteSize);
+	//	mp_graphicsDevice->GetDevice()->CreateCommittedResource( &heapProps, D3D12_HEAP_FLAG_NONE, &ibDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_globalIndexBuffer));
+
+	//	void* pData = nullptr;
+	//	CD3DX12_RANGE readRange(0, 0);
+	//	m_globalIndexBuffer->Map(0, &readRange, &pData);
+	//	memcpy(pData, globalIdxs.data(), iByteSize);
+	//	m_globalIndexBuffer->Unmap(0, nullptr);
+
+	//	m_globalIBView.BufferLocation = m_globalIndexBuffer->GetGPUVirtualAddress();
+	//	m_globalIBView.Format = DXGI_FORMAT_R16_UINT;
+	//	m_globalIBView.SizeInBytes = iByteSize;
+	//}
 
 	return E_NOTIMPL;
 }

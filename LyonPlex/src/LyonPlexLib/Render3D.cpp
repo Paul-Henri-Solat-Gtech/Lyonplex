@@ -12,7 +12,7 @@ bool Render3D::Init(HWND windowHandle, ECSManager* ECS, GraphicsDevice* graphics
 
 
 	m_graphicsPipeline.Init(mp_graphicsDevice, mp_descriptorManager, mp_commandManager);
-	m_meshManager.Init(mp_graphicsDevice);
+	m_meshManager.Init(mp_graphicsDevice, mp_commandManager);
 
 	InitConstantBuffer();
 	UpdateCbParams();

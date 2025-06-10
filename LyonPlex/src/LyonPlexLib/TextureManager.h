@@ -1,117 +1,10 @@
 #pragma once
-#include "ResourceManager.h"
-#include "GraphicsDevice.h"
-#include <wrl.h>
-#include <d3d12.h>
-#include <string>
-#include <vector>
-
-using Microsoft::WRL::ComPtr;
-
-//-----------------------------------------------------------------------------//
-// Texture data struct: holds GPU resource and SRV descriptor handle
-//-----------------------------------------------------------------------------//
-struct TextureData {
-    ComPtr<ID3D12Resource>       resource;      // GPU texture resource
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;     // SRV description
-    // Optionally: store descriptor heap index or handle
-    size_t                       descriptorIndex;
-
-    // Called by ResourceManager when loading
-    bool LoadFromFile(const std::string& path, GraphicsDevice* device,
-        DescriptorManager* descMgr) {
-        // Use helper to load WIC texture into default heap
-        ComPtr<ID3D12Resource> uploadHeap;
-        HRESULT hr = DirectX::CreateWICTextureFromFile(
-            device->GetDevice(), device->GetCommandQueue(),
-            std::wstring(path.begin(), path.end()).c_str(),
-            &resource, &uploadHeap
-        );
-        if (FAILED(hr)) return false;
-
-        // Create SRV in a shader-visible descriptor heap
-        auto srvHandle = descMgr->AllocateSrvGPU();
-        device->GetDevice()->CreateShaderResourceView(
-            resource.Get(), nullptr, srvHandle
-        );
-
-        // Store index (optional)
-        descriptorIndex = descMgr->CurrentSrvIndex() - 1;
-
-        return true;
-    }
-
-    void Unload() {
-        resource.Reset();
-        // descriptor cleanup if needed
-    }
-};
-
-//-----------------------------------------------------------------------------//
-// TextureManager using ResourceManager<TextureData>
-//-----------------------------------------------------------------------------//
-class TextureManager {
-public:
-    using TextureID = ResourceManager<TextureData, std::string>::ResourceID;
-
-    TextureManager(GraphicsDevice* device, DescriptorManager* descMgr)
-        : m_device(device), m_descMgr(descMgr) {}
-
-    // Load or retrieve existing texture
-    TextureID LoadTexture(const std::string& key) {
-        if (m_textureLib.Has(key))
-            return m_textureLib.Load(key); // returns existing
-
-        // Create new entry then call custom LoadFromFile
-        auto id = m_textureLib.Add(TextureData{});
-        auto& texData = m_textureLib.Get(id);
-        if (!texData.LoadFromFile(key, m_device, m_descMgr)) {
-            m_textureLib.Remove(id);
-            throw std::runtime_error("Failed to load texture: " + key);
-        }
-        return id;
-    }
-
-    // Retrieve SRV GPU handle for binding
-    D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandle(TextureID id) const {
-        size_t idx = m_textureLib.Get(id).descriptorIndex;
-        return m_descMgr->GetSrvHeap()->GetGPUDescriptorHandleForHeapStart() +
-            idx * m_descMgr->GetSrvDescriptorSize();
-    }
-
-private:
-    ResourceManager<TextureData, std::string> m_textureLib;
-    GraphicsDevice* m_device;
-    DescriptorManager* m_descMgr;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-----------------------------------------------------------------------------//
-// SOLUCE 2
-//-----------------------------------------------------------------------------//
-
-
-#pragma once
 
 #include "ResourceManager.h"
 #include "GraphicsDevice.h"
 #include "DescriptorManager.h"
 #include "WICTextureLoader.h"   // DirectXTK helper
+#include "ResourceUploadBatch.h"   // DirectXTK helper
 #include <wrl.h>
 #include <d3d12.h>
 #include <string>
@@ -126,20 +19,40 @@ struct TextureData {
     size_t                       descriptorIndex; // index in SRV heap
 
     // Called by ResourceManager when loading
-    bool LoadFromFile(const std::string& path,
-        GraphicsDevice* device,
-        DescriptorManager* descMgr) {
+    bool LoadFromFile(const std::string& path, GraphicsDevice* device, DescriptorManager* descMgr) 
+    {
+        ResourceUploadBatch uploadBatch(m_device.Get());
+        uploadBatch.Begin();
+
+        ComPtr<ID3D12Resource> texture;
+        HRESULT hr = CreateWICTextureFromFile(
+            m_device.Get(),
+            uploadBatch,
+            L"texture.png",
+            &texture,
+            true // mipmaps
+        );
+
+        // SRV
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Format = texture->GetDesc().Format;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = texture->GetDesc().MipLevels;
+
+        CD3DX12_CPU_DESCRIPTOR_HANDLE hCpuSrv(m_srvHeap->GetCPUDescriptorHandleForHeapStart(), slotIndex, descriptorSize);
+        m_device->CreateShaderResourceView(texture.Get(), &srvDesc, hCpuSrv);
+
+        uploadBatch.End(m_commandQueue.Get()).wait();
+
+
+
         // Convert path to wide string
         std::wstring wpath(path.begin(), path.end());
+
         // Create texture resource (default heap) + upload heap
         ComPtr<ID3D12Resource> uploadHeap;
-        HRESULT hr = DirectX::CreateWICTextureFromFile(
-            device->GetDevice(),
-            device->GetCommandQueue(),
-            wpath.c_str(),
-            &resource,
-            &uploadHeap
-        );
+        HRESULT hr = DirectX::CreateWICTextureFromFile(device->GetDevice().Get(), device->GetCommandQueue().Get(), wpath.c_str(), &resource, &uploadHeap);
         if (FAILED(hr)) return false;
 
         // Create SRV in shader-visible heap
@@ -172,19 +85,49 @@ public:
         : m_device(device), m_descMgr(descMgr) {}
 
     // Load or retrieve existing texture
-    TextureID LoadTexture(const std::string& key) {
-        if (m_textureLib.Has(key))
-            return m_textureLib.Load(key);
+    TextureID LoadTexture(const std::string& key)
+    {
+        // 1. Extraire l'extension en minuscules
+        auto ext = std::filesystem::path(key).extension().string();
+        std::for_each(ext.begin(), ext.end(), [](char& c) { c = static_cast<char>(std::tolower(c)); });
 
-        // Add placeholder, then actually load
-        auto id = m_textureLib.Add(TextureData{});
+        // 2. Ajout d'une entrée dans le ResourceManager
+        auto id = m_textureLib.Has(key) ? m_textureLib.Load(key) : m_textureLib.Add(TextureData{});
         auto& texData = m_textureLib.Get(id);
-        if (!texData.LoadFromFile(key, m_device, m_descMgr)) {
-            m_textureLib.Remove(id);
+
+        // 3. Charger la texture selon le format
+        ComPtr<ID3D12Resource> uploadHeap; // pour les copies upload
+        HRESULT hr = S_OK;
+        std::wstring wpath(key.begin(), key.end());
+
+        if (ext == L".dds") 
+        {
+            hr = DirectX::CreateDDSTextureFromFile(m_device->GetDevice(), m_device->GetCommandQueue(), wpath.c_str(), &texData.resource, &uploadHeap);
+        }
+        else 
+        {
+            hr = DirectX::CreateWICTextureFromFile(m_device->GetDevice(), m_device->GetCommandQueue(), wpath.c_str(), &texData.resource, &uploadHeap);
+        }
+        if (FAILED(hr)) 
+        {
+            // Nettoyage en cas d'échec
+            if (!m_textureLib.Has(key))
+                m_textureLib.Remove(id);
             throw std::runtime_error("Failed to load texture: " + key);
         }
+
+        // 4. Créer le SRV dans le heap CPU, puis stocker l'offset
+        auto srvCpu = m_descMgr->AllocateSrvCPU();
+        m_device->GetDevice()->CreateShaderResourceView(
+            texData.resource.Get(),
+            nullptr,    // descriptor par défaut
+            srvCpu
+        );
+        texData.descriptorIndex = m_descMgr->CurrentSrvOffset() - 1;
+
         return id;
     }
+
 
     // Get GPU descriptor handle for SRV slot
     D3D12_GPU_DESCRIPTOR_HANDLE GetSrvGpuHandle(TextureID id) const {

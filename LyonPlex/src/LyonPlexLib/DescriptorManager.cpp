@@ -12,9 +12,29 @@ void DescriptorManager::CreateDescriptors()
 {
 	m_depthResources.resize(mp_graphicsDevice->GetFrameCount());
 
-
+	UINT additionalRTV = 0; //  albedo , normal , depth , light , ...
 	CreateRtvHeap(mp_graphicsDevice->GetFrameCount());
+	/*
+	numRTVdescriptors = nb de backbuffers(swap chain)
+					  + nb de textures rendues(G - Buffer, post - processing)
+					  + nb de rendus intermédiaires
+	*/
+
 	CreateDsvHeap(mp_graphicsDevice->GetFrameCount());
+	/*
+	numDSVdescriptors = 1 pour le z-buffer principal 
+					  + 1 par shadow map 
+					  + 1 par pass custom (par ex : depth pre-pass)
+	*/
+
+
+	CreateSrvHeap(mp_graphicsDevice->GetFrameCount());
+	/*
+	numSRVdescriptors = total des :
+									- Textures visibles dans les shaders (1 par entité si chaque entité a une texture)
+									- Buffers (CBV pour per-object/per-frame data)
+									- UAV (ex : compute shaders)
+	*/
 
 	for (int i = 0; i < mp_graphicsDevice->GetFrameCount(); i++)
 	{
